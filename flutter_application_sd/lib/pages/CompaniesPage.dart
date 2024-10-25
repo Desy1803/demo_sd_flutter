@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_sd/dtos/Company.dart';
+import 'package:flutter_application_sd/pages/CompanyBalanceSheet.dart';
 import 'package:flutter_application_sd/pages/CompanyDetailPage.dart';
-
+import 'package:flutter_application_sd/pages/CompanySearchResultsPage.dart';
+import 'package:flutter_application_sd/pages/GlobalMarketStatusPage.dart';
+import 'package:flutter_application_sd/restManagers/HttpRequest.dart';
+import 'package:flutter_application_sd/widgets/CustomAppBar.dart';
 
 class CompanyCategory {
   final String name;
@@ -16,42 +20,50 @@ class CompaniesPage extends StatefulWidget {
 }
 
 class _CompaniesPageState extends State<CompaniesPage> {
-  List<Company> companies = [
-    Company(symbol: 'IBM', name: 'IBM', category: 'Technology'),
-    Company(symbol: 'MSFT', name: 'Microsoft', category: 'Technology'),
-    Company(symbol: 'GS', name: 'Goldman Sachs', category: 'Finance'),
-    Company(symbol: 'PFE', name: 'Pfizer', category: 'Healthcare'),
-    Company(symbol: 'KO', name: 'Coca-Cola', category: 'Consumer Goods'),
-    Company(symbol: 'XOM', name: 'ExxonMobil', category: 'Energy'),
-    Company(symbol: 'AAPL', name: 'Apple', category: 'Technology'),
-    Company(symbol: 'JPM', name: 'JP Morgan', category: 'Finance'),
-    Company(symbol: 'UNH', name: 'UnitedHealth Group', category: 'Healthcare'),
-    Company(symbol: 'PG', name: 'Procter & Gamble', category: 'Consumer Goods'),
-    Company(symbol: 'AMZN', name: 'Amazon', category: 'Consumer Goods'),
-    Company(symbol: 'FB', name: 'Facebook', category: 'Technology'),
-    Company(symbol: 'TSLA', name: 'Tesla', category: 'Automotive'),
-    Company(symbol: 'NFLX', name: 'Netflix', category: 'Entertainment'),
-    Company(symbol: 'INTC', name: 'Intel', category: 'Technology'),
-    Company(symbol: 'CVX', name: 'Chevron', category: 'Energy'),
-    Company(symbol: 'WMT', name: 'Wal-Mart', category: 'Consumer Goods'),
-    Company(symbol: 'BRK.B', name: 'Berkshire Hathaway', category: 'Finance'),
-    Company(symbol: 'JNJ', name: 'Johnson & Johnson', category: 'Healthcare'),
-    Company(symbol: 'ADBE', name: 'Adobe', category: 'Technology'),
-    // Aggiungi ulteriori aziende come necessario
-  ];
+  List<Company> companies = [];
+  bool isLoading = true;
+  String? errorMessage;
 
-  List<CompanyCategory> categories = [
-    CompanyCategory('Technology', Icons.computer),
-    CompanyCategory('Finance', Icons.monetization_on),
-    CompanyCategory('Healthcare', Icons.health_and_safety),
-    CompanyCategory('Consumer Goods', Icons.shopping_cart),
-    CompanyCategory('Utilities', Icons.lightbulb),
-    CompanyCategory('Energy', Icons.local_fire_department),
-    CompanyCategory('Automotive', Icons.directions_car),
-    CompanyCategory('Entertainment', Icons.movie),
-  ];
+List<CompanyCategory> categories = [
+  CompanyCategory('Technology', Icons.computer),
+  CompanyCategory('Finance', Icons.monetization_on),
+  CompanyCategory('Healthcare', Icons.health_and_safety),
+  CompanyCategory('Consumer Discretionary', Icons.car_rental_outlined),
+  CompanyCategory('Consumer Staples', Icons.apple_outlined),
+  CompanyCategory('Communication Services', Icons.phone),
+  CompanyCategory('Energy', Icons.local_fire_department),
+  CompanyCategory('Utilities', Icons.lightbulb),
+  CompanyCategory('Industrials', Icons.business_center), 
+];
+
 
   String? hoveredCategory;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCompanies();
+  }
+
+  Future<void> _loadCompanies() async {
+    try {
+      List<Company>? companiesRet = await Model.sharedInstance.viewCompanies();
+
+      setState(() {
+        if (companiesRet != null) {
+          companies = companiesRet..sort((a, b) => a.name.compareTo(b.name));
+        } else {
+          errorMessage = 'Nessuna azienda trovata.';
+        }
+        isLoading = false; 
+      });
+    } catch (e) {
+      setState(() {
+        errorMessage = 'Errore nel caricamento delle aziende: ${e.toString()}';
+        isLoading = false; 
+      });
+    }
+  }
 
   IconData getCategoryIcon(String categoryName) {
     for (var category in categories) {
@@ -59,166 +71,158 @@ class _CompaniesPageState extends State<CompaniesPage> {
         return category.icon;
       }
     }
-    return Icons.help; 
+    return Icons.help;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Aziende per Categoria')),
+      appBar: CustomAppBar(
+        title: 'Trading Reports',
+        backgroundColor: const Color(0xFF001F3F), 
+        actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => GlobalMarketStatusPage(),
+                ),
+              );
+            },
+            icon: Icon(
+              Icons.access_time, // Icona dell'orologio
+              color: Colors.white, // Puoi cambiare il colore se necessario
+            ),
+          ),
+        ],
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Categorie',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-            Wrap(
-              spacing: 10.0,
-              runSpacing: 10.0,
-              children: categories.map((category) {
-                return MouseRegion(
-                  onEnter: (_) {
-                    setState(() {
-                      hoveredCategory = category.name; 
-                    });
-                  },
-                  onExit: (_) {
-                    setState(() {
-                      hoveredCategory = null; 
-                    });
-                  },
-                  child: GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => CompanySearchResultsPage(category: category.name),
-                        ),
-                      );
-                    },
-                    child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: Colors.blue[100], 
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: const Color.fromARGB(255, 109, 152, 148)),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(category.icon, color: Color.fromARGB(255, 109, 152, 148)),
-                          const SizedBox(width: 8),
-                          Text(
-                            category.name,
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: hoveredCategory == category.name ? Colors.grey : Colors.black, 
+        child: isLoading
+            ? Center(child: CircularProgressIndicator())
+            : errorMessage != null
+                ? Center(child: Text(errorMessage!))
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 16),
+                      Wrap(
+                        spacing: 10.0,
+                        runSpacing: 10.0,
+                        children: categories.map((category) {
+                          return MouseRegion(
+                            onEnter: (_) {
+                              setState(() {
+                                hoveredCategory = category.name;
+                              });
+                            },
+                            onExit: (_) {
+                              setState(() {
+                                hoveredCategory = null;
+                              });
+                            },
+                            child: GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        CompanySearchResultsPage(category: category.name),
+                                  ),
+                                );
+                              },
+                              child: Container(
+                                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                decoration: BoxDecoration(
+                                  color: Colors.blue[100],
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(color: const Color.fromARGB(255, 109, 152, 148)),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(category.icon, color: Color.fromARGB(255, 109, 152, 148)),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      category.name,
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        color: hoveredCategory == category.name
+                                            ? Colors.grey
+                                            : Colors.black,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ),
-                          ),
-                        ],
+                          );
+                        }).toList(),
                       ),
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
-            const SizedBox(height: 32),
-            Text(
-              'Aziende',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-            Expanded(
-              child: ListView.builder(
-                itemCount: companies.length,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    leading: Icon(getCategoryIcon(companies[index].category), color: Color.fromARGB(255, 109, 152, 148)), // Aggiunto simbolo categoria
-                    title: Text(
-                      companies[index].name,
-                      style: TextStyle(
-                        decoration: TextDecoration.underline,
+                      const SizedBox(height: 32),
+                      Text(
+                        'Companies',
+                        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                       ),
-                    ),
-                    subtitle: Text(companies[index].category),
-                    trailing: Text(
-                      companies[index].symbol, // Mostra il simbolo dell'azienda
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => CompanyDetailPage(company: companies[index]),
+                      const SizedBox(height: 16),
+                      Expanded(
+                        child: ListView.builder(
+                          itemCount: companies.length,
+                          itemBuilder: (context, index) {
+                            return ListTile(
+                              leading: Icon(
+                                getCategoryIcon(companies[index].category),
+                                color: Color.fromARGB(255, 109, 152, 148),
+                              ),
+                              title: Text(
+                                companies[index].name,
+                                style: TextStyle(
+                                  decoration: TextDecoration.underline,
+                                ),
+                              ),
+                              subtitle: Text(companies[index].category),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    companies[index].symbol,
+                                    style: TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                  SizedBox(width: 8),
+                                  GestureDetector(
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => CompanyBalanceSheet(
+                                            symbol: companies[index].symbol
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    child: Icon(
+                                      Icons.show_chart,
+                                      color: Color.fromARGB(255, 109, 152, 148),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => CompanyDetailPage(company: companies[index]),
+                                  ),
+                                );
+                              },
+                            );
+
+                          },
                         ),
-                      );
-                    },
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class CompanySearchResultsPage extends StatelessWidget {
-  final String category;
-
-  const CompanySearchResultsPage({Key? key, required this.category}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Risultati per $category')),
-      body: Center(
-        child: Text('Visualizza aziende per la categoria: $category'),
-      ),
-    );
-  }
-}
-
-class CompanyDetailPage extends StatelessWidget {
-  final Company company;
-
-  const CompanyDetailPage({Key? key, required this.company}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(company.name)),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Nome: ${company.name}',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 8),
-            Text(
-              'Simbolo: ${company.symbol}', // Mostra il simbolo
-              style: TextStyle(fontSize: 18),
-            ),
-            SizedBox(height: 8),
-            Text(
-              'Categoria: ${company.category}',
-              style: TextStyle(fontSize: 18),
-            ),
-            SizedBox(height: 16),
-            Text(
-              'Dettagli aggiuntivi dell\'azienda potrebbero essere visualizzati qui.',
-              style: TextStyle(fontSize: 16),
-            ),
-          ],
-        ),
+                      ),
+                    ],
+                  ),
       ),
     );
   }

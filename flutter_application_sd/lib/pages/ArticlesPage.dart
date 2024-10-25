@@ -6,14 +6,14 @@ import 'package:flutter_application_sd/pages/ArticleDetailedPage.dart';
 import 'package:flutter_application_sd/widgets/CustomAppBar.dart';
 
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+class ArticlesPage extends StatefulWidget {
+  const ArticlesPage({super.key});
 
   @override
-  _HomePageState createState() => _HomePageState();
+  _ArticlesPageState createState() => _ArticlesPageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _ArticlesPageState extends State<ArticlesPage> {
   List<Article> articles = [];
   int? tappedIndex;
 
@@ -66,15 +66,15 @@ class _HomePageState extends State<HomePage> {
         title: 'Articles',
       ),
       body: articles.isEmpty
-          ? Center(child: CircularProgressIndicator()) // Mostra l'indicatore di caricamento
+          ? Center(child: CircularProgressIndicator()) 
           : GridView.builder(
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2, // Numero di colonne
-                childAspectRatio: 0.5, // Regola l'aspect ratio se necessario
+                crossAxisCount: 2, 
+                childAspectRatio: 0.5, 
               ),
               itemCount: articles.length,
               itemBuilder: (context, index) {
-                Article article = articles[index]; // Definisci la variabile articolo
+                Article article = articles[index]; 
 
                 return GestureDetector(
                   onTap: () {
@@ -88,7 +88,7 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ).then((_) {
                       setState(() {
-                        tappedIndex = null; // Reimposta l'indice selezionato al ritorno
+                        tappedIndex = null; 
                       });
                     });
                   },
@@ -105,14 +105,14 @@ class _HomePageState extends State<HomePage> {
                                   width: double.infinity,
                                 )
                               : Container(
-                                  color: Colors.grey[200], // Background di placeholder
+                                  color: Colors.grey[200], 
                                   child: Padding(
                                     padding: const EdgeInsets.all(8.0),
                                     child: Text(
                                       article.description ?? 'No description available',
                                       style: const TextStyle(fontSize: 14.0),
-                                      maxLines: 3, // Limita a 3 righe
-                                      overflow: TextOverflow.ellipsis, // Ellissi per il testo in overflow
+                                      maxLines: 3, 
+                                      overflow: TextOverflow.ellipsis, 
                                     ),
                                   ),
                                 ),
