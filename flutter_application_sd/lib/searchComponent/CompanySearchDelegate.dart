@@ -46,7 +46,7 @@ class CompanySearchDelegate extends SearchDelegate {
               decoration: TextDecoration.underline, 
             ),
           ),
-          subtitle: Text('Categoria: ${company.category}'),
+          subtitle: Text('Category: ${company.category}'),
           onTap: () {
             Navigator.push(
               context,
@@ -73,7 +73,7 @@ class CompanySearchDelegate extends SearchDelegate {
             company.name,
             style: const TextStyle(
               fontWeight: FontWeight.bold,
-              decoration: TextDecoration.underline, // Sottolinea il nome dell'azienda
+              decoration: TextDecoration.underline, 
             ),
           ),
           subtitle: Text('Categoria: ${company.category}'),
