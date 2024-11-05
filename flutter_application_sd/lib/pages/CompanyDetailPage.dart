@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_sd/dtos/Company.dart';
 import 'package:flutter_application_sd/dtos/CompanyDetails.dart';
 import 'package:flutter_application_sd/restManagers/HttpRequest.dart';
+import 'package:flutter_application_sd/widgets/CustomAppBar.dart';
 class CompanyDetailPage extends StatefulWidget {
   final Company company;
 
@@ -32,15 +33,13 @@ class _CompanyDetailPageState extends State<CompanyDetailPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.company.name),
-      ),
+      appBar: CustomAppBar(),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: isLoading
             ? Center(child: CircularProgressIndicator())
             : companyDetails == null
-                ? Center(child: Text('Errore nel caricamento dei dettagli'))
+                ? Center(child: Text('Error during loading company details'))
                 : Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_sd/dtos/Company.dart';
 import 'package:flutter_application_sd/pages/CompanyDetailPage.dart';
 import 'package:flutter_application_sd/restManagers/HttpRequest.dart';
+import 'package:flutter_application_sd/widgets/CustomAppBar.dart';
 
 class CompanySearchResultsPage extends StatefulWidget {
   final String category;
@@ -28,7 +29,7 @@ class _CompanySearchResultsPageState extends State<CompanySearchResultsPage> {
       List<Company>? companiesRet = await Model.sharedInstance.getCompaniesBySearch(category);
       setState(() {
         if (companiesRet == null) {
-          errorMessage = 'Errore nel caricamento delle aziende.';
+          errorMessage = 'Error during loading companies.';
         } else {
           filteredCompanies = companiesRet;
         }
@@ -36,7 +37,7 @@ class _CompanySearchResultsPageState extends State<CompanySearchResultsPage> {
       });
     } catch (e) {
       setState(() {
-        errorMessage = 'Si è verificato un errore: ${e.toString()}';
+        errorMessage = 'Error: ${e.toString()}';
         isLoading = false;
       });
     }
@@ -45,7 +46,7 @@ class _CompanySearchResultsPageState extends State<CompanySearchResultsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Risultati per ${widget.category}')),
+      appBar: CustomAppBar(),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: isLoading
@@ -53,7 +54,7 @@ class _CompanySearchResultsPageState extends State<CompanySearchResultsPage> {
             : errorMessage != null
                 ? Center(child: Text(errorMessage!))
                 : filteredCompanies.isEmpty
-                    ? Center(child: Text('Nessuna azienda trovata per la categoria selezionata.'))
+                    ? Center(child: Text('No companies found for the selected category.'))
                     : ListView.builder(
                         itemCount: filteredCompanies.length,
                         itemBuilder: (context, index) {

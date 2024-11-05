@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_sd/dtos/Article.dart';
-import 'package:flutter_application_sd/pages/LoginPage.dart';
+import 'package:flutter_application_sd/widgets/CustomAppBar.dart';
 
 class ArticleDetailedPage extends StatelessWidget {
   final Article article;
@@ -9,19 +9,7 @@ class ArticleDetailedPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(article.title),
-        leading: IconButton(
-          icon: Icon(Icons.account_box),
-          onPressed: () {
-            // Navigate to LoginPage
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => LoginPage()),
-            );
-          },
-        ),
-      ),
+      appBar: CustomAppBar(),
       body: Padding(
         padding: EdgeInsets.all(16.0),
         child: Text(article.description),

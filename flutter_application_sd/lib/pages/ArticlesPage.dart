@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_sd/pages/RegisterPage.dart'; // Importa la pagina di login
 import 'package:flutter_application_sd/dtos/Article.dart';
 import 'package:flutter_application_sd/pages/ArticleDetailedPage.dart';
 import 'package:flutter_application_sd/widgets/CustomAppBar.dart';
@@ -20,11 +19,10 @@ class _ArticlesPageState extends State<ArticlesPage> {
   @override
   void initState() {
     super.initState();
-    fetchMockArticles(); // Recupera articoli mockati all'inizializzazione del widget
+    fetchMockArticles(); 
   }
 
   void fetchMockArticles() {
-    // Lista di articoli mockati
     articles = [
       Article(
         title: 'Article 1',
