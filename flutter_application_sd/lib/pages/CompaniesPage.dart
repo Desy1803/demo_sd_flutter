@@ -24,18 +24,17 @@ class _CompaniesPageState extends State<CompaniesPage> {
   bool isLoading = true;
   String? errorMessage;
 
-List<CompanyCategory> categories = [
-  CompanyCategory('Technology', Icons.computer),
-  CompanyCategory('Finance', Icons.monetization_on),
-  CompanyCategory('Healthcare', Icons.health_and_safety),
-  CompanyCategory('Consumer Discretionary', Icons.car_rental_outlined),
-  CompanyCategory('Consumer Staples', Icons.apple_outlined),
-  CompanyCategory('Communication Services', Icons.phone),
-  CompanyCategory('Energy', Icons.local_fire_department),
-  CompanyCategory('Utilities', Icons.lightbulb),
-  CompanyCategory('Industrials', Icons.business_center), 
-];
-
+  List<CompanyCategory> categories = [
+    CompanyCategory('Technology', Icons.computer),
+    CompanyCategory('Finance', Icons.monetization_on),
+    CompanyCategory('Healthcare', Icons.health_and_safety),
+    CompanyCategory('Consumer Discretionary', Icons.car_rental_outlined),
+    CompanyCategory('Consumer Staples', Icons.apple_outlined),
+    CompanyCategory('Communication Services', Icons.phone),
+    CompanyCategory('Energy', Icons.local_fire_department),
+    CompanyCategory('Utilities', Icons.lightbulb),
+    CompanyCategory('Industrials', Icons.business_center),
+  ];
 
   String? hoveredCategory;
 
@@ -48,20 +47,22 @@ List<CompanyCategory> categories = [
   Future<void> _loadCompanies() async {
     try {
       List<Company>? companiesRet = await Model.sharedInstance.viewCompanies();
+      print('Fetched Companies: $companiesRet');
 
       setState(() {
-        if (companiesRet != null) {
+        if (companiesRet != null && companiesRet.isNotEmpty) {
           companies = companiesRet..sort((a, b) => a.name.compareTo(b.name));
         } else {
           errorMessage = 'Nessuna azienda trovata.';
         }
-        isLoading = false; 
+        isLoading = false;
       });
     } catch (e) {
       setState(() {
         errorMessage = 'Errore nel caricamento delle aziende: ${e.toString()}';
-        isLoading = false; 
+        isLoading = false;
       });
+      print('Error loading companies: $e');
     }
   }
 
@@ -79,7 +80,7 @@ List<CompanyCategory> categories = [
     return Scaffold(
       appBar: CustomAppBar(
         title: 'Trading Reports',
-        backgroundColor: const Color(0xFF001F3F), 
+        backgroundColor: const Color(0xFF001F3F),
         actions: [
           IconButton(
             onPressed: () {
@@ -91,8 +92,8 @@ List<CompanyCategory> categories = [
               );
             },
             icon: Icon(
-              Icons.access_time, // Icona dell'orologio
-              color: Colors.white, // Puoi cambiare il colore se necessario
+              Icons.access_time,
+              color: Colors.white,
             ),
           ),
         ],
@@ -102,126 +103,139 @@ List<CompanyCategory> categories = [
         child: isLoading
             ? Center(child: CircularProgressIndicator())
             : errorMessage != null
-                ? Center(child: Text(errorMessage!))
-                : Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 16),
-                      Wrap(
-                        spacing: 10.0,
-                        runSpacing: 10.0,
-                        children: categories.map((category) {
-                          return MouseRegion(
-                            onEnter: (_) {
-                              setState(() {
-                                hoveredCategory = category.name;
-                              });
-                            },
-                            onExit: (_) {
-                              setState(() {
-                                hoveredCategory = null;
-                              });
-                            },
-                            child: GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        CompanySearchResultsPage(category: category.name),
-                                  ),
-                                );
+                ? Center(child: Text(errorMessage!, style: TextStyle(color: Colors.black, fontSize: 18)))
+                : SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 16),
+                        Wrap(
+                          spacing: 10.0,
+                          runSpacing: 10.0,
+                          children: categories.map((category) {
+                            return MouseRegion(
+                              onEnter: (_) {
+                                setState(() {
+                                  hoveredCategory = category.name;
+                                });
                               },
-                              child: Container(
-                                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                decoration: BoxDecoration(
-                                  color: Colors.blue[100],
-                                  borderRadius: BorderRadius.circular(20),
-                                  border: Border.all(color: const Color.fromARGB(255, 109, 152, 148)),
+                              onExit: (_) {
+                                setState(() {
+                                  hoveredCategory = null;
+                                });
+                              },
+                              child: GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => CompanySearchResultsPage(category: category.name),
+                                    ),
+                                  );
+                                },
+                                child: AnimatedContainer(
+                                  duration: Duration(milliseconds: 300),
+                                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                  decoration: BoxDecoration(
+                                    color: hoveredCategory == category.name
+                                        ? Colors.grey.withOpacity(0.3)
+                                        : Colors.white,
+                                    borderRadius: BorderRadius.circular(20),
+                                    border: Border.all(color: Colors.black),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(category.icon, color: Colors.black),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        category.name,
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                                child: Row(
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                        const SizedBox(height: 32),
+                        Text(
+                          'Companies',
+                          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black),
+                        ),
+                        const SizedBox(height: 16),
+                        ListView.builder(
+                          physics: NeverScrollableScrollPhysics(),
+                          shrinkWrap: true, // Permette di adattarsi al contenuto
+                          itemCount: companies.length,
+                          itemBuilder: (context, index) {
+                            return Card(
+                              color: Colors.white,
+                              margin: const EdgeInsets.symmetric(vertical: 8),
+                              elevation: 4,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: ListTile(
+                                leading: Icon(
+                                  getCategoryIcon(companies[index].category),
+                                  color: Colors.black,
+                                ),
+                                title: Text(
+                                  companies[index].name,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                                subtitle: Text(
+                                  companies[index].category,
+                                  style: TextStyle(color: Colors.grey[700]),
+                                ),
+                                trailing: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Icon(category.icon, color: Color.fromARGB(255, 109, 152, 148)),
-                                    const SizedBox(width: 8),
                                     Text(
-                                      category.name,
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        color: hoveredCategory == category.name
-                                            ? Colors.grey
-                                            : Colors.black,
+                                      companies[index].symbol,
+                                      style: TextStyle(fontWeight: FontWeight.bold),
+                                    ),
+                                    SizedBox(width: 8),
+                                    GestureDetector(
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => CompanyBalanceSheet(
+                                              symbol: companies[index].symbol,
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                      child: Icon(
+                                        Icons.show_chart,
+                                        color: Colors.black,
                                       ),
                                     ),
                                   ],
                                 ),
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                      ),
-                      const SizedBox(height: 32),
-                      Text(
-                        'Companies',
-                        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 16),
-                      Expanded(
-                        child: ListView.builder(
-                          itemCount: companies.length,
-                          itemBuilder: (context, index) {
-                            return ListTile(
-                              leading: Icon(
-                                getCategoryIcon(companies[index].category),
-                                color: Color.fromARGB(255, 109, 152, 148),
-                              ),
-                              title: Text(
-                                companies[index].name,
-                                style: TextStyle(
-                                  decoration: TextDecoration.underline,
-                                ),
-                              ),
-                              subtitle: Text(companies[index].category),
-                              trailing: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    companies[index].symbol,
-                                    style: TextStyle(fontWeight: FontWeight.bold),
-                                  ),
-                                  SizedBox(width: 8),
-                                  GestureDetector(
-                                    onTap: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => CompanyBalanceSheet(
-                                            symbol: companies[index].symbol
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                    child: Icon(
-                                      Icons.show_chart,
-                                      color: Color.fromARGB(255, 109, 152, 148),
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => CompanyDetailPage(company: companies[index]),
                                     ),
-                                  ),
-                                ],
+                                  );
+                                },
                               ),
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => CompanyDetailPage(company: companies[index]),
-                                  ),
-                                );
-                              },
                             );
-
                           },
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
       ),
     );

@@ -28,7 +28,7 @@ class Model {
           .decode(rawResult)
           .map((i) => Company.fromJson(i))
           .toList());
-      print(res);
+      print("Getting companies");
       return res;
     } catch (e) {
       return null;
@@ -48,7 +48,7 @@ class Model {
       List<Company> res = List<Company>.from(
         json.decode(rawResult).map((i) => Company.fromJson(i)).toList(),
       );
-      print(res);
+      print("Getting companies by search");
       return res;
     } catch (e) {
       return null;
@@ -66,7 +66,7 @@ class Model {
       );
 
       CompanyDetails res = CompanyDetails.fromJson(json.decode(rawResult));
-      print(res);
+      print("Getting companies details");
       return res;
     } catch (e) {
       print('Errore durante il recupero dei dettagli dell\'azienda: $e');
@@ -86,7 +86,7 @@ class Model {
       final parsed = json.decode(rawResult);
       final marketsList = parsed['annualReports'] as List<dynamic>;
       List<AnnualReport> res = marketsList.map((i) => AnnualReport.fromJson(i)).toList();
-      print(res);
+      print("getting companies report");
       
       return res;
     } catch (e) {
@@ -104,11 +104,11 @@ class Model {
       final parsed = json.decode(rawResult);
       final marketsList = parsed['markets'] as List<dynamic>;
       List<Market> res = marketsList.map((i) => Market.fromJson(i)).toList();
-      print(res);
+      print("getting global status market");
       
       return res;
     } catch (e) {
-      print('Errore nel caricamento dei mercati: $e');
+      print('Error during loading global status market: $e');
       return null;
     }
   }
