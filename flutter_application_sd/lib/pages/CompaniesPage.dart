@@ -4,6 +4,7 @@ import 'package:flutter_application_sd/pages/CompanyBalanceSheet.dart';
 import 'package:flutter_application_sd/pages/CompanyDetailPage.dart';
 import 'package:flutter_application_sd/pages/CompanySearchResultsPage.dart';
 import 'package:flutter_application_sd/pages/GlobalMarketStatusPage.dart';
+import 'package:flutter_application_sd/pages/LoginPage.dart'; // Import della pagina di login
 import 'package:flutter_application_sd/restManagers/HttpRequest.dart';
 import 'package:flutter_application_sd/widgets/CustomAppBar.dart';
 
@@ -53,13 +54,13 @@ class _CompaniesPageState extends State<CompaniesPage> {
         if (companiesRet != null && companiesRet.isNotEmpty) {
           companies = companiesRet..sort((a, b) => a.name.compareTo(b.name));
         } else {
-          errorMessage = 'Nessuna azienda trovata.';
+          errorMessage = 'No companies found.';
         }
         isLoading = false;
       });
     } catch (e) {
       setState(() {
-        errorMessage = 'Errore nel caricamento delle aziende: ${e.toString()}';
+        errorMessage = 'Error loading companies: ${e.toString()}';
         isLoading = false;
       });
       print('Error loading companies: $e');
@@ -93,6 +94,20 @@ class _CompaniesPageState extends State<CompaniesPage> {
             },
             icon: Icon(
               Icons.access_time,
+              color: Colors.white,
+            ),
+          ),
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => LoginPage(), // Naviga alla pagina di login
+                ),
+              );
+            },
+            icon: Icon(
+              Icons.person,
               color: Colors.white,
             ),
           ),
@@ -170,7 +185,7 @@ class _CompaniesPageState extends State<CompaniesPage> {
                         const SizedBox(height: 16),
                         ListView.builder(
                           physics: NeverScrollableScrollPhysics(),
-                          shrinkWrap: true, // Permette di adattarsi al contenuto
+                          shrinkWrap: true, 
                           itemCount: companies.length,
                           itemBuilder: (context, index) {
                             return Card(
