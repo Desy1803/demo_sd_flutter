@@ -9,6 +9,8 @@ enum TypeHeader { json, urlencoded }
 class RestManager {
   ErrorListener? delegate;
 
+  set token(String token) {}
+
   Future<String> _makeRequest(
     String serverAddress, String servicePath, String method, TypeHeader? type, 
     {Map<String, dynamic>? value, dynamic body}

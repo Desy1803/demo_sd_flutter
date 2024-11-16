@@ -1,10 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter_application_sd/dtos/AnnualReport.dart';
+import 'package:flutter_application_sd/dtos/AuthenticationData.dart';
 import 'package:flutter_application_sd/dtos/Company.dart';
 import 'package:flutter_application_sd/dtos/CompanyDetails.dart';
 import 'package:flutter_application_sd/dtos/Market.dart';
+import 'package:flutter_application_sd/dtos/User.dart';
 import 'package:flutter_application_sd/supports/Costants.dart';
+import 'package:flutter_application_sd/supports/LoginResults.dart';
 
 import 'RestManager.dart';
 
@@ -13,11 +16,66 @@ class Model {
 
   RestManager _restManager = RestManager();
 
+  late AuthenticationData _authenticationData;
+
+  Future<String?> logIn(String email, String password) async {
+    
+      Map<String, dynamic> params = Map();
+      params["username"] = email;
+      params["password"] = password;
+      print(params);
+      try {
+        await _restManager.makePostRequest(
+          Constants.ADDRESS_STORE_SERVER, Constants.POSTREQUEST_LOGIN, params,
+          type: TypeHeader.json);
+      }catch(e){
+        print(e);
+      }
+      _restManager.token = _authenticationData.accessToken;
+      Timer.periodic(Duration(seconds: (_authenticationData.expiresIn - 50)),
+          (Timer t) {
+        _refreshToken(_authenticationData.refreshToken);
+      });
+      return null;
+    
+  }
+
+  Future<bool> _refreshToken(String refreshToken) async {
+    try {
+      Map<String, dynamic> params = Map();
+      params["refreshToken"] = refreshToken;
+      String result = await _restManager.makePostRequest(
+          Constants.ADDRESS_STORE_SERVER,
+          Constants.POSTREQUEST_REFRESHTOKEN,
+          params,
+          type: TypeHeader.urlencoded);
+      _authenticationData = AuthenticationData.fromJson(jsonDecode(result));
+      if (_authenticationData.hasError()) {
+        return false;
+      }
+      _restManager.token = _authenticationData.accessToken;
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  void registerUser(User u) async{
+    Map<String, dynamic> params = Map();
+    params["user"] = u.toJson();
+    try {
+       await _restManager.makePostRequest(
+          Constants.ADDRESS_STORE_SERVER, Constants.POSTREQUEST_REGISTRATION, params,
+          type: TypeHeader.json);
+    }catch(e){
+      print(e);
+    }
+  }
+
 
 //Companies
 
   
-//view list of fornitori
   Future<List<Company>?>  viewCompanies() async {
     try {
       String rawResult = await _restManager.makeGetRequest(
@@ -116,5 +174,4 @@ class Model {
   
 
 }
-
 

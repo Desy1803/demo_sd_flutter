@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:country_list_pick/country_list_pick.dart';
+import 'package:flutter_application_sd/dtos/User.dart';
+import 'package:flutter_application_sd/restManagers/HttpRequest.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({Key? key}) : super(key: key);
@@ -14,6 +16,13 @@ class _RegisterPageState extends State<RegisterPage> {
   String? _phonePrefix; 
   DateTime? _birthday;
 
+   Duration get loginTime => Duration(milliseconds: 2250);
+   
+  void _registerUser(User user) async {
+    return Future.delayed(loginTime).then((_) {
+      return Model.sharedInstance.registerUser(user);
+    });
+  }
 
   Widget _buildTextField({
     required String label,
@@ -214,6 +223,28 @@ Widget _buildCountryField() {
       ),
     );
   }
+   void _submitForm() {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+    _formKey.currentState!.save();
+
+    User user = User(
+      username: _username,
+      password: _password,
+      firstName: _firstName,
+      lastName: _lastName,
+      email: _email,
+      phoneNumber: _phoneNumber,
+      address: _address,
+      city: _city,
+      country: _country,
+      phonePrefix: _phonePrefix,
+      birthday: _birthday,
+    );
+
+    _registerUser(user);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -245,40 +276,33 @@ Widget _buildCountryField() {
               ),
             ),
             const SizedBox(height: 16),
-            _buildUsernameField(),
-            _buildPasswordField(),
-            _buildFirstNameField(),
-            _buildLastNameField(),
-            _buildEmailField(),
-            _buildPhoneNumberField(),
-            _buildAddressField(),
-            _buildCityField(),
-            _buildCountryField(),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () {
-                if (!_formKey.currentState!.validate()) {
-                  return;
-                }
-                _formKey.currentState!.save();
-                print('Username: $_username');
-                print('Password: $_password');
-                print('First Name: $_firstName');
-                print('Last Name: $_lastName');
-                print('Email: $_email');
-                print('Phone Number: $_phonePrefix $_phoneNumber');
-                print('Address: $_address');
-                print('City: $_city');
-                print('Country: $_country');
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF001F3F),
-                padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-              child: const Text(
-                "Register",
-                style: TextStyle(fontSize: 16, color: Colors.white),
+            Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  _buildUsernameField(),
+                  _buildPasswordField(),
+                  _buildFirstNameField(),
+                  _buildLastNameField(),
+                  _buildEmailField(),
+                  _buildPhoneNumberField(),
+                  _buildAddressField(),
+                  _buildCityField(),
+                  _buildCountryField(),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: _submitForm, // Chiama _submitForm quando si preme il pulsante
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF001F3F),
+                      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    child: const Text(
+                      "Register",
+                      style: TextStyle(fontSize: 16, color: Colors.white),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],

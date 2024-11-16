@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_sd/pages/CompaniesPage.dart';
-
+import 'package:flutter_application_sd/restManagers/HttpRequest.dart';
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
 
@@ -33,6 +33,14 @@ class _LoginState extends State<LoginPage> with SingleTickerProviderStateMixin {
   void dispose() {
     _animationController.dispose();
     super.dispose();
+  }
+
+   Duration get loginTime => Duration(milliseconds: 2250);
+
+  Future<String?> _authUser(String email, String password) async {
+    return Future.delayed(loginTime).then((_) {
+      return Model.sharedInstance.logIn(email, password);
+    });
   }
 
   Widget _buildEmail() {
@@ -132,13 +140,36 @@ class _LoginState extends State<LoginPage> with SingleTickerProviderStateMixin {
                     _buildPassword(),
                     const SizedBox(height: 16),
                     ElevatedButton(
-                      onPressed: () {
+                      onPressed: () async {
                         if (!_formKey.currentState!.validate()) {
                           return;
                         }
                         _formKey.currentState!.save();
                         print("Email: $_email");
                         print("Password: $_password");
+
+                        String? result = await _authUser(_email!, _password!);
+
+                        if (result == null) {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (context) => CompaniesPage()),
+                          );
+                        } else {
+                          showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: const Text("Login Failed"),
+                              content: Text(result),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  child: const Text("OK"),
+                                ),
+                              ],
+                            ),
+                          );
+                        }
                       },
                       style: ElevatedButton.styleFrom(
                         shape: RoundedRectangleBorder(
@@ -155,7 +186,8 @@ class _LoginState extends State<LoginPage> with SingleTickerProviderStateMixin {
                         style: TextStyle(fontSize: 18),
                       ),
                     ),
-                    const SizedBox(height: 16),
+
+                                        const SizedBox(height: 16),
                     TextButton(
                       onPressed: () {
                         print("Navigating to Forgot Password...");
