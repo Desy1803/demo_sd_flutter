@@ -1,7 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_application_sd/dtos/Company.dart';
-import 'package:flutter_application_sd/pages/CompanyDetailPage.dart';
+import 'package:flutter_application_sd/pagesNotAuth/CompanyDetailPage.dart';
 
 class CompanySearchDelegate extends SearchDelegate {
   final List<Company> companies;

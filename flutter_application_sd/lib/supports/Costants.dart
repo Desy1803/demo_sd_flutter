@@ -22,5 +22,7 @@ class Constants {
   static final String POSTREQUEST_LOGIN="/api/users/security/login";
   static final String POSTREQUEST_REFRESHTOKEN="api/users/security/refresh";
   static final String POSTREQUEST_REGISTRATION="api/users/security/register";
+  static final String SEND_VERIFICATION_EMAIL="api/users/security/send-verification-email";
+  static final String VERIFICATION_EMAIL="api/users/security/verified-email";
 
 }

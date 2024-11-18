@@ -7,8 +7,7 @@ import 'package:flutter_application_sd/dtos/CompanyDetails.dart';
 import 'package:flutter_application_sd/dtos/Market.dart';
 import 'package:flutter_application_sd/dtos/User.dart';
 import 'package:flutter_application_sd/supports/Costants.dart';
-import 'package:flutter_application_sd/supports/LoginResults.dart';
-
+import 'package:http/http.dart';
 import 'RestManager.dart';
 
 class Model {
@@ -60,16 +59,80 @@ class Model {
     }
   }
 
-  void registerUser(User u) async{
-    Map<String, dynamic> params = Map();
-    params["user"] = u.toJson();
-    try {
-       await _restManager.makePostRequest(
-          Constants.ADDRESS_STORE_SERVER, Constants.POSTREQUEST_REGISTRATION, params,
-          type: TypeHeader.json);
-    }catch(e){
-      print(e);
+  Future<bool> registerUser(User u) async {
+  Map<String, dynamic> params = u.toJson();
+  try {
+    final response = await _restManager.makePostRequest(
+      Constants.ADDRESS_STORE_SERVER,
+      Constants.POSTREQUEST_REGISTRATION,
+      params,
+      type: TypeHeader.json,
+    );
+
+    print('Raw response: $response'); // Debug per capire cosa restituisce il server
+
+    var decodedResponse = jsonDecode(response);
+
+    // Gestione di formati diversi
+    if (decodedResponse is Map<String, dynamic>) {
+      if (decodedResponse['success'] == true) {
+        return true;
+      } else {
+        print('Registration failed with response: $decodedResponse');
+        return false;
+      }
+    } else if (decodedResponse is bool) {
+      return decodedResponse; // Caso in cui il server restituisce un booleano
+    } else {
+      print('Unexpected response format: $decodedResponse');
+      return false;
     }
+  } catch (e) {
+    print('Error during user registration: $e');
+    print('Params sent: $params'); // Informazioni sui parametri inviati
+    return false; 
+  }
+}
+
+
+
+  Future<bool?> sendVerificationEmail(String email) async{
+     Map<String, dynamic> params = {
+      "email": email,
+    };
+    try {
+      final response = await _restManager.makePostRequest(
+        Constants.ADDRESS_STORE_SERVER,
+        Constants.SEND_VERIFICATION_EMAIL,
+        params,
+        type: TypeHeader.json,
+      );
+      print('Raw response: $response');
+      return jsonDecode(response) as bool?;
+    } catch (e) {
+      print('Error during sending email registration: $e');
+      return null;
+    }
+    
+  }
+Future<bool?> isEmailVerified(String email) async{
+     Map<String, dynamic> params = {
+      "email": email,
+    };
+    print(email);
+    try {
+      final response = await _restManager.makePostRequest(
+        Constants.ADDRESS_STORE_SERVER,
+        Constants.VERIFICATION_EMAIL,
+        params,
+        type: TypeHeader.json,
+      );
+      return jsonDecode(response) as bool?;
+    } catch (e) {
+      print('Error during user registration: $e');
+      return null;
+    }
+    
   }
 
 

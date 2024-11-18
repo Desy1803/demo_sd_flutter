@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_sd/dtos/Company.dart';
-import 'package:flutter_application_sd/pages/CompanyBalanceSheet.dart';
-import 'package:flutter_application_sd/pages/CompanyDetailPage.dart';
-import 'package:flutter_application_sd/pages/CompanySearchResultsPage.dart';
-import 'package:flutter_application_sd/pages/GlobalMarketStatusPage.dart';
-import 'package:flutter_application_sd/pages/LoginPage.dart'; // Import della pagina di login
+import 'package:flutter_application_sd/pagesNotAuth/CompanyBalanceSheet.dart';
+import 'package:flutter_application_sd/pagesNotAuth/CompanyDetailPage.dart';
+import 'package:flutter_application_sd/pagesNotAuth/CompanySearchResultsPage.dart';
+import 'package:flutter_application_sd/pagesNotAuth/GlobalMarketStatusPage.dart';
+import 'package:flutter_application_sd/pagesNotAuth/securityFlows/LoginPage.dart'; // Import della pagina di login
 import 'package:flutter_application_sd/restManagers/HttpRequest.dart';
 import 'package:flutter_application_sd/widgets/CustomAppBar.dart';
 

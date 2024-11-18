@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_sd/pages/CompaniesPage.dart';
+import 'package:flutter_application_sd/pagesNotAuth/CompaniesPage.dart';
 import 'package:flutter_application_sd/restManagers/HttpRequest.dart';
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);

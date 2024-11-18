@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_sd/pages/CompanySearchResultsPage.dart';
+import 'package:flutter_application_sd/pagesNotAuth/CompanySearchResultsPage.dart';
 
 class CustomAppBarLogin extends StatelessWidget implements PreferredSizeWidget {
   final String title;

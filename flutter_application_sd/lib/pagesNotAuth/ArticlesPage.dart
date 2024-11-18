@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_sd/dtos/Article.dart';
-import 'package:flutter_application_sd/pages/ArticleDetailedPage.dart';
+import 'package:flutter_application_sd/pagesNotAuth/ArticleDetailedPage.dart';
 import 'package:flutter_application_sd/widgets/CustomAppBar.dart';
 
 

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_sd/dtos/Company.dart';
-import 'package:flutter_application_sd/pages/CompanyDetailPage.dart';
+import 'package:flutter_application_sd/pagesNotAuth/CompanyDetailPage.dart';
 import 'package:flutter_application_sd/restManagers/HttpRequest.dart';
 import 'package:flutter_application_sd/widgets/CustomAppBar.dart';
 

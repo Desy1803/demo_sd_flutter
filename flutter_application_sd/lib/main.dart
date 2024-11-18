@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_sd/pages/ArticlesPage.dart';
-import 'package:flutter_application_sd/pages/CompaniesPage.dart';
-import 'package:flutter_application_sd/pages/LoginPage.dart';
-import 'package:flutter_application_sd/pages/RegisterPage.dart';
+import 'package:flutter_application_sd/pagesNotAuth/ArticlesPage.dart';
+import 'package:flutter_application_sd/pagesNotAuth/CompaniesPage.dart';
+import 'package:flutter_application_sd/pagesNotAuth/securityFlows/LoginPage.dart';
+import 'package:flutter_application_sd/pagesNotAuth/securityFlows/RegisterPage.dart';
 
 void main() {
   runApp(const MyApp());
@@ -16,6 +16,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: "Trading reports",
       home: CompaniesPage(),
+      debugShowCheckedModeBanner: false,
       routes: {
         '/login': (context) => const LoginPage(),
         '/news': (context) => const ArticlesPage(),

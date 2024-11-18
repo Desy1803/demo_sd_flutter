@@ -36,7 +36,6 @@ class User {
       'address': address,
       'city': city,
       'country': country,
-      'phonePrefix': phonePrefix,
       'birthday': birthday?.toIso8601String(),
     };
   }
@@ -52,7 +51,6 @@ class User {
       address: json['address'],
       city: json['city'],
       country: json['country'],
-      phonePrefix: json['phonePrefix'],
       birthday: json['birthday'] != null
           ? DateTime.parse(json['birthday'])
           : null,
