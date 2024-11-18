@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_sd/pagesAuth/PersonalArea.dart';
 import 'package:flutter_application_sd/pagesNotAuth/CompaniesPage.dart';
 import 'package:flutter_application_sd/restManagers/HttpRequest.dart';
 class LoginPage extends StatefulWidget {
@@ -103,7 +104,7 @@ class _LoginState extends State<LoginPage> with SingleTickerProviderStateMixin {
           "Login",
           style: TextStyle(color: Colors.white),
         ),
-        backgroundColor: const Color(0xFF001F3F), // Colore personalizzato
+        backgroundColor: const Color(0xFF001F3F), 
       ),
       body: AnimatedBuilder(
         animation: _fadeAnimation,
@@ -153,7 +154,7 @@ class _LoginState extends State<LoginPage> with SingleTickerProviderStateMixin {
                         if (result == null) {
                           Navigator.pushReplacement(
                             context,
-                            MaterialPageRoute(builder: (context) => CompaniesPage()),
+                            MaterialPageRoute(builder: (context) => PersonalArea()),
                           );
                         } else {
                           showDialog(

@@ -25,8 +25,6 @@ Future<void> _registerUser(User user) async {
     final response = await Model.sharedInstance.registerUser(user);
 
     if (response) {
-      
-      print("Registrazione completata con successo. Navigo alla pagina di verifica email.");
       Navigator.push(
         context,
         MaterialPageRoute(

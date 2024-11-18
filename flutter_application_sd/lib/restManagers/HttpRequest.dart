@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter_application_sd/dtos/AnnualReport.dart';
+import 'package:flutter_application_sd/dtos/Article.dart';
 import 'package:flutter_application_sd/dtos/AuthenticationData.dart';
 import 'package:flutter_application_sd/dtos/Company.dart';
 import 'package:flutter_application_sd/dtos/CompanyDetails.dart';
@@ -229,7 +230,27 @@ Future<bool?> isEmailVerified(String email) async{
       
       return res;
     } catch (e) {
-      print('Error during loading global status market: $e');
+      print('Error loading global status market: $e');
+      return null;
+    }
+  }
+
+  //Articles
+  Future<List<Article>?> getPublicArticles() async{
+    try {
+      String rawResult = await _restManager.makeGetRequest(
+        Constants.ADDRESS_STORE_SERVER,
+        Constants.ALL_PUBLIC_ARTICLES
+      );
+
+      final parsed = json.decode(rawResult) as List<dynamic>;
+  
+      List<Article> res = parsed.map((item) => Article.fromJson(item)).toList();
+      print("getting public articles");
+      
+      return res;
+    } catch (e) {
+      print('Error loading public articles: $e');
       return null;
     }
   }

@@ -48,8 +48,6 @@ class _CompaniesPageState extends State<CompaniesPage> {
   Future<void> _loadCompanies() async {
     try {
       List<Company>? companiesRet = await Model.sharedInstance.viewCompanies();
-      print('Fetched Companies: $companiesRet');
-
       setState(() {
         if (companiesRet != null && companiesRet.isNotEmpty) {
           companies = companiesRet..sort((a, b) => a.name.compareTo(b.name));

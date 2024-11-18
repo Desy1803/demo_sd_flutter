@@ -25,4 +25,7 @@ class Constants {
   static final String SEND_VERIFICATION_EMAIL="api/users/security/send-verification-email";
   static final String VERIFICATION_EMAIL="api/users/security/verified-email";
 
+  //Articles
+  static final String ALL_PUBLIC_ARTICLES="api/articles/public";
+
 }
