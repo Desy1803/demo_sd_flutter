@@ -47,8 +47,7 @@ class _CompanyBalanceSheetState extends State<CompanyBalanceSheet>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomAppBar(
-        title: '${widget.symbol} Balance Sheet',
-        backgroundColor: const Color(0xFF001F3F), 
+        showBackButton: true,
       ),
       body: isLoading
           ? Center(child: CircularProgressIndicator())

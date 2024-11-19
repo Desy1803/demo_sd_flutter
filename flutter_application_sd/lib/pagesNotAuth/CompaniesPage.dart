@@ -78,8 +78,7 @@ class _CompaniesPageState extends State<CompaniesPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomAppBar(
-        title: 'Trading Reports',
-        backgroundColor: const Color(0xFF001F3F),
+        showBackButton: false,
         actions: [
           IconButton(
             onPressed: () {

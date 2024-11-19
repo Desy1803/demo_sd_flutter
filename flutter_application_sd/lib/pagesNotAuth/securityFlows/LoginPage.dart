@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_sd/pagesAuth/PersonalArea.dart';
 import 'package:flutter_application_sd/pagesNotAuth/CompaniesPage.dart';
 import 'package:flutter_application_sd/restManagers/HttpRequest.dart';
+import 'package:flutter_application_sd/widgets/CustomAppBar.dart';
+import 'package:flutter_application_sd/widgets/CustomAppBarAuthFlow%20.dart';
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
 
@@ -93,19 +95,7 @@ class _LoginState extends State<LoginPage> with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => CompaniesPage()),);
-          },
-        ),
-        title: const Text(
-          "Login",
-          style: TextStyle(color: Colors.white),
-        ),
-        backgroundColor: const Color(0xFF001F3F), 
-      ),
+      appBar: CustomAppBarAuthFlow (),
       body: AnimatedBuilder(
         animation: _fadeAnimation,
         builder: (context, child) {
@@ -127,7 +117,7 @@ class _LoginState extends State<LoginPage> with SingleTickerProviderStateMixin {
                       alignment: Alignment.center,
                       children: [
                         Text(
-                          "Trading Reports",
+                          "Login",
                           style: TextStyle(
                             fontSize: 36,
                             fontWeight: FontWeight.bold,
@@ -191,8 +181,7 @@ class _LoginState extends State<LoginPage> with SingleTickerProviderStateMixin {
                                         const SizedBox(height: 16),
                     TextButton(
                       onPressed: () {
-                        print("Navigating to Forgot Password...");
-                        //TODO Aggiungi navigazione alla pagina "Forgot Password" quando implementata
+                        Navigator.pushNamed(context, "/forgot-password");
                       },
                       child: const Text(
                         "Forgot Password?",

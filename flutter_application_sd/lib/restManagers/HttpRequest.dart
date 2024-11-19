@@ -135,7 +135,25 @@ Future<bool?> isEmailVerified(String email) async{
     }
     
   }
-
+Future<bool?> sendPasswordReset(String email) async{
+     Map<String, dynamic> params = {
+      "email": email,
+    };
+    print(email);
+    try {
+      final response = await _restManager.makePostRequest(
+        Constants.ADDRESS_STORE_SERVER,
+        Constants.PASSWORD_RESET,
+        params,
+        type: TypeHeader.json,
+      );
+      return jsonDecode(response) as bool?;
+    } catch (e) {
+      print('Error during reset password: $e');
+      return null;
+    }
+    
+  }
 
 //Companies
 

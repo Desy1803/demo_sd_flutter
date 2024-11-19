@@ -1,51 +1,49 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_sd/pagesNotAuth/CompanySearchResultsPage.dart';
+import 'package:flutter_application_sd/widgets/SearchWidget.dart'; // Importa SearchWidget
+
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
-  final List<Widget>? actions;
   final bool showBackButton;
   final Color backgroundColor;
   final Color titleColor;
-  final TextEditingController _searchController = TextEditingController();
+  final List<Widget> actions; // Aggiungi il parametro actions per le azioni personalizzate
 
   CustomAppBar({
-    this.title = "Trading Reports",
-    this.actions,
+    this.title = 'Trading Reports',
     this.showBackButton = true,
     this.backgroundColor = const Color(0xFF001F3F),
     this.titleColor = Colors.white,
+    this.actions = const [], // Azioni personalizzate (opzionali)
   });
-
-  void _onSearch(BuildContext context, String query) {
-    if (query.isNotEmpty) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => CompanySearchResultsPage(category: query),
-        ),
-      );
-      _searchController.clear(); 
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
       automaticallyImplyLeading: false,
       backgroundColor: backgroundColor,
-      titleSpacing: 0,
-      toolbarHeight: 100,
+      toolbarHeight: 120, // Altezza fissa per l'AppBar
       flexibleSpace: Column(
         children: [
+          // Parte superiore dell'AppBar
           Container(
-            height: 50,
+            height: 60,
             padding: EdgeInsets.symmetric(horizontal: 16),
             color: backgroundColor,
             child: Row(
               children: [
-                Icon(Icons.show_chart, color: titleColor, size: 24),
-                SizedBox(width: 8),
+                // Icona per tornare indietro
+                if (showBackButton)
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back, color: Colors.white, size: 26),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                  ),
+                const SizedBox(width: 8),
+                const Icon(Icons.show_chart, color: Colors.white, size: 26),
+                const SizedBox(width: 8),
+                // Titolo della AppBar
                 Text(
                   title,
                   style: TextStyle(
@@ -55,43 +53,15 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   ),
                 ),
                 Spacer(),
-                Expanded(
-                  child: Align(
-                    alignment: Alignment.centerRight,
-                    child: AnimatedContainer(
-                      duration: Duration(milliseconds: 300),
-                      width: 200,
-                      child: TextField(
-                        controller: _searchController,
-                        decoration: InputDecoration(
-                          prefixIcon: Icon(Icons.search, color: titleColor),
-                          hintText: 'Search companies...',
-                          hintStyle: TextStyle(color: Colors.white70),
-                          filled: true,
-                          fillColor: Colors.white24,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(20),
-                            borderSide: BorderSide.none,
-                          ),
-                        ),
-                        style: TextStyle(color: titleColor),
-                        onSubmitted: (query) => _onSearch(context, query),
-                      ),
-                    ),
-                  ),
-                ),
-                IconButton(
-                  icon: Icon(Icons.person, color: titleColor),
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/login');
-                  },
-                ),
+                // Aggiungi le azioni personalizzate (se presenti)
+                ...actions,
               ],
             ),
           ),
+          // Menu sotto l'AppBar
           Container(
             height: 50,
-            color: backgroundColor.withOpacity(0.9),
+            color: Color(0xFF001F3F).withOpacity(0.9),
             child: Row(
               children: [
                 _buildNavItem(context, 'Home', '/'),
@@ -136,5 +106,5 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   @override
-  Size get preferredSize => Size.fromHeight(100);
+  Size get preferredSize => Size.fromHeight(120); // Altezza fissa dell'AppBar
 }

@@ -11,7 +11,6 @@ class ArticleDetailedPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomAppBar(
-        title: article.title, // Titolo dell'articolo
       ),
       body: SingleChildScrollView(
         child: Padding(

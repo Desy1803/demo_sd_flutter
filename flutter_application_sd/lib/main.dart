@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_sd/pagesAuth/PersonalArea.dart';
 import 'package:flutter_application_sd/pagesNotAuth/ArticlesPage.dart';
 import 'package:flutter_application_sd/pagesNotAuth/CompaniesPage.dart';
+import 'package:flutter_application_sd/pagesNotAuth/securityFlows/ForgotPasswordPage.dart';
 import 'package:flutter_application_sd/pagesNotAuth/securityFlows/LoginPage.dart';
 import 'package:flutter_application_sd/pagesNotAuth/securityFlows/RegisterPage.dart';
 
@@ -15,14 +16,15 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: "Trading reports",
+      title: "Trading Reports",
       home: CompaniesPage(),
       debugShowCheckedModeBanner: false,
       routes: {
         '/login': (context) => const LoginPage(),
         '/news': (context) => const ArticlesPage(),
         '/personal-areas':(context) => PersonalArea(),
-        '/registration': (context) => const RegisterPage() 
+        '/registration': (context) => const RegisterPage(),
+        '/forgot-password':(context)=> ForgotPasswordPage()
       },
 
     );

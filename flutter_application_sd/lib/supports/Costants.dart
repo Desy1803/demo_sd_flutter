@@ -24,7 +24,7 @@ class Constants {
   static final String POSTREQUEST_REGISTRATION="api/users/security/register";
   static final String SEND_VERIFICATION_EMAIL="api/users/security/send-verification-email";
   static final String VERIFICATION_EMAIL="api/users/security/verified-email";
-
+  static final String PASSWORD_RESET="api/users/security/forgot-password";
   //Articles
   static final String ALL_PUBLIC_ARTICLES="api/articles/public";
 

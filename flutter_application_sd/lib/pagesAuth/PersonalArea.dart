@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_sd/widgets/CustomAppBar.dart';
 import 'WriteArticle.dart'; // Importa la pagina WriteArticle
 
 class PersonalArea extends StatelessWidget {
@@ -21,12 +22,11 @@ class PersonalArea extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Personal Area"),
-        backgroundColor: Color(0xFF001F3F),
-      ),
+      appBar: CustomAppBar(
+        showBackButton: true, 
+        ),
       body: articles.isEmpty
-          ? Center(child: Text("Create new article")) // Messaggio se non ci sono articoli
+          ? Center(child: Text("Create new article")) 
           : ListView.builder(
               itemCount: articles.length,
               itemBuilder: (context, index) {
@@ -35,7 +35,6 @@ class PersonalArea extends StatelessWidget {
                   subtitle: Text(articles[index]['company'] ?? 'No Company'),
                   trailing: Text(articles[index]['year'] ?? 'No Year'),
                   onTap: () {
-                    // Azione quando si clicca su un articolo
                   },
                 );
               },

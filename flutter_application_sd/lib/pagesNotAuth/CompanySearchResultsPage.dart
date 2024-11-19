@@ -46,7 +46,9 @@ class _CompanySearchResultsPageState extends State<CompanySearchResultsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(),
+      appBar: CustomAppBar(
+        showBackButton: true,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: isLoading

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:country_list_pick/country_list_pick.dart';
 import 'package:flutter_application_sd/dtos/User.dart';
 import 'package:flutter_application_sd/restManagers/HttpRequest.dart';
+import 'package:flutter_application_sd/widgets/CustomAppBarAuthFlow%20.dart';
 
 import 'EmailVerificationPage.dart';
 
@@ -331,19 +332,7 @@ void _submitForm() {
 @override
 Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF001F3F),
-        title: const Text(
-          "Trading Reports",
-          style: TextStyle(color: Colors.white),
-        ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-      ),
+      appBar: CustomAppBarAuthFlow (),
       body: Stack(
         children: [
           SingleChildScrollView(

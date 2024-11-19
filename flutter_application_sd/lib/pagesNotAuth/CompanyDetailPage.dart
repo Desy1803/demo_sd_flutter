@@ -35,7 +35,9 @@ class _CompanyDetailPageState extends State<CompanyDetailPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(),
+      appBar: CustomAppBar(
+        showBackButton: true,
+      ),
       body: Container(
         color: Colors.grey[200],
         padding: const EdgeInsets.all(16.0),

@@ -79,8 +79,7 @@ class _GlobalMarketStatusState extends State<GlobalMarketStatusPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomAppBar(
-        title: 'Global Market Status',
-        backgroundColor: const Color(0xFF001F3F), 
+        showBackButton: true,
       ),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
