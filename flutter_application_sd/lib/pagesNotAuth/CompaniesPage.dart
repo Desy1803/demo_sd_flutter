@@ -4,7 +4,7 @@ import 'package:flutter_application_sd/pagesNotAuth/CompanyBalanceSheet.dart';
 import 'package:flutter_application_sd/pagesNotAuth/CompanyDetailPage.dart';
 import 'package:flutter_application_sd/pagesNotAuth/CompanySearchResultsPage.dart';
 import 'package:flutter_application_sd/pagesNotAuth/GlobalMarketStatusPage.dart';
-import 'package:flutter_application_sd/pagesNotAuth/securityFlows/LoginPage.dart'; // Import della pagina di login
+import 'package:flutter_application_sd/pagesNotAuth/securityFlows/LoginPage.dart'; 
 import 'package:flutter_application_sd/restManagers/HttpRequest.dart';
 import 'package:flutter_application_sd/widgets/CustomAppBar.dart';
 

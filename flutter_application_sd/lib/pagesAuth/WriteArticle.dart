@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_sd/widgets/DropZoneWidget.dart'; // Il widget di DropZone
+import 'package:flutter_application_sd/dtos/Article.dart';
+
+import 'package:flutter_application_sd/restManagers/HttpRequest.dart';
+import 'package:flutter_application_sd/widgets/DropZoneWidget.dart'; 
 import 'dart:html' as html;
 
 class WriteArticlePage extends StatefulWidget {
@@ -8,31 +11,33 @@ class WriteArticlePage extends StatefulWidget {
 }
 
 class _WriteArticlePageState extends State<WriteArticlePage> {
-  // Controller per i campi di testo
   TextEditingController titleController = TextEditingController();
   TextEditingController companyController = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
   TextEditingController fiscalYearController = TextEditingController();
 
-  String imageUrl = '';  // URL dell'immagine
-  bool isPublic = true;  // Impostazione pubblico/privato
-  bool isAIEnabled = false;  // Se l'AI è abilitata
-  String articleType = '';  // 'FUNDAMENTAL' o 'ANALYSIS'
+  String imageUrl = '';  
+  bool isPublic = true;  
+  bool isAIEnabled = false;  
+  String articleType = '';  
   String selectedCompany = '';
   String selectedFiscalYear = '';
 
-  // Funzione per salvare l'articolo (scrittura manuale)
-  void saveArticle() {
-    print("Title: ${titleController.text}");
-    print("Company: ${companyController.text}");
-    print("Description: ${descriptionController.text}");
-    print("Fiscal Year: ${fiscalYearController.text}");
-    print("Image URL: $imageUrl");
-    print("Public: $isPublic");
-    // Qui puoi fare una chiamata al BE per salvare l'articolo
+  Future<void> saveArticle() async {
+    Article article = new Article(
+      id: 1, 
+      title: titleController.text, 
+      description: descriptionController.text, 
+      company: companyController.text, 
+      author: "author", 
+      timeUnit: fiscalYearController.text, 
+      isPublic: isPublic, 
+      isAI: isAIEnabled ,
+      imageUrl: imageUrl
+    );
+    Article? articleRet = await Model.sharedInstance.createArticle(article);
   }
 
-  // Funzione per creare l'articolo con AI
   void createWithAI() {
     showDialog(
       context: context,
@@ -69,7 +74,6 @@ class _WriteArticlePageState extends State<WriteArticlePage> {
     );
   }
 
-  // Funzione per aprire la selezione della compagnia e dell'anno fiscale
   void openCompanyYearSelection() {
     showDialog(
       context: context,
@@ -97,7 +101,6 @@ class _WriteArticlePageState extends State<WriteArticlePage> {
                   ElevatedButton(
                     onPressed: () {
                       Navigator.pop(context);
-                      // Qui puoi fare la chiamata al BE passando articleType, selectedCompany, e selectedFiscalYear
                       print('Creating article with $articleType for company $selectedCompany and fiscal year $selectedFiscalYear');
                     },
                     child: Text('Create'),

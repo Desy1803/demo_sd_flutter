@@ -8,14 +8,22 @@ enum TypeHeader { json, urlencoded }
 
 class RestManager {
   ErrorListener? delegate;
+  String? _token; 
 
-  set token(String token) {}
+  set token(String token) {
+    _token = token; 
+  }
 
   Future<String> _makeRequest(
-    String serverAddress, String servicePath, String method, TypeHeader? type, 
-    {Map<String, dynamic>? value, dynamic body}
-  ) async {
-    // Costruzione dell'URI
+    String serverAddress,
+    String servicePath,
+    String method,
+    TypeHeader? type, {
+    Map<String, dynamic>? value,
+    dynamic body,
+    bool useToken = false, 
+  }) async {
+    
     Uri uri = Uri.http(serverAddress, servicePath, value);
     bool errorOccurred = false;
     int maxRetries = 3; 
@@ -39,7 +47,10 @@ class RestManager {
         if (contentType.isNotEmpty) {
           headers[HttpHeaders.contentTypeHeader] = contentType;
         }
-
+        if (useToken && _token != null) {
+          headers[HttpHeaders.authorizationHeader] = "Bearer $_token"; 
+        }
+        print("Request: ${formattedBody} and ${headers}");
         switch (method.toLowerCase()) {
           case "post":
             response = await post(uri, headers: headers, body: formattedBody);
@@ -77,30 +88,30 @@ class RestManager {
   }
 
   Future<String> makePostRequest(
-    String serverAddress, String servicePath, dynamic value, 
+    String serverAddress, String servicePath, dynamic value, bool useToken,
     {TypeHeader type = TypeHeader.json}
   ) async {
-    return _makeRequest(serverAddress, servicePath, "post", type, body: value);
+    return _makeRequest(serverAddress, servicePath, "post", type, body: value, useToken: useToken);
   }
 
   Future<String> makeGetRequest(
-    String serverAddress, String servicePath, 
-    [Map<String, String>? queryParams, TypeHeader? type]
+    String serverAddress, String servicePath,  bool useToken,
+    [Map<String, dynamic>? queryParams, TypeHeader? type]
   ) async {
-    return _makeRequest(serverAddress, servicePath, "get", type, value: queryParams);
+    return _makeRequest(serverAddress, servicePath, "get", type, value: queryParams, useToken: useToken);
   }
 
   Future<String> makePutRequest(
-    String serverAddress, String servicePath, 
+    String serverAddress, String servicePath, bool useToken,
     [Map<String, dynamic>? value, TypeHeader? type]
   ) async {
-    return _makeRequest(serverAddress, servicePath, "put", type, value: value);
+    return _makeRequest(serverAddress, servicePath, "put", type, value: value, useToken: useToken);
   }
 
   Future<String> makeDeleteRequest(
-    String serverAddress, String servicePath, 
+    String serverAddress, String servicePath, bool useToken,
     [Map<String, String>? value, TypeHeader? type]
   ) async {
-    return _makeRequest(serverAddress, servicePath, "delete", type, value: value);
+    return _makeRequest(serverAddress, servicePath, "delete", type, value: value, useToken: useToken);
   }
 }

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_sd/widgets/SearchWidget.dart'; // Importa SearchWidget
 
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {

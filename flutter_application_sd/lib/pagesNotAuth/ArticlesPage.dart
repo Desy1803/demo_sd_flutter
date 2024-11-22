@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_sd/dtos/Article.dart';
+import 'package:flutter_application_sd/dtos/SearchArticleCriteria.dart';
 import 'package:flutter_application_sd/pagesNotAuth/ArticleDetailedPage.dart';
 import 'package:flutter_application_sd/restManagers/HttpRequest.dart';
 import 'package:flutter_application_sd/widgets/CustomAppBar.dart';
@@ -11,11 +12,19 @@ class ArticlesPage extends StatefulWidget {
   @override
   _ArticlesPageState createState() => _ArticlesPageState();
 }
+
 class _ArticlesPageState extends State<ArticlesPage> {
   List<Article> articles = [];
   int? tappedIndex;
   bool isLoading = true;
   String? errorMessage;
+  String searchQuery = "";
+  String? selectedCategory;
+  String? selectedDate;
+
+  // Aggiungi le categorie e le date per i filtri
+  final List<String> categories = ['All', 'Tech', 'Health', 'Business'];
+  final List<String> dates = ['All', 'Last Week', 'Last Month', 'Last Year'];
 
   @override
   void initState() {
@@ -30,7 +39,17 @@ class _ArticlesPageState extends State<ArticlesPage> {
         errorMessage = null;
       });
 
-      List<Article>? loadedArticles = await Model.sharedInstance.getPublicArticles();
+      // Creiamo l'oggetto SearchArticleCriteria per passare i parametri ai filtri
+      SearchArticleCriteria searchCriteria = SearchArticleCriteria(
+        title: searchQuery,
+        category: selectedCategory,
+        date: selectedDate,
+      );
+
+      // Carichiamo gli articoli pubblici con i filtri
+      List<Article>? loadedArticles = await Model.sharedInstance.getPublicArticles(
+        criteria: searchCriteria
+      );
 
       setState(() {
         if (loadedArticles != null && loadedArticles.isNotEmpty) {
@@ -167,6 +186,72 @@ class _ArticlesPageState extends State<ArticlesPage> {
                         );
                       },
                     ),
+    );
+  }
+
+  // Barra di ricerca per il titolo
+  Widget _buildSearchBar() {
+    return TextField(
+      onChanged: (query) {
+        setState(() {
+          searchQuery = query;
+        });
+        // Ricarica gli articoli dopo aver aggiornato la ricerca
+        _loadArticles();
+      },
+      decoration: InputDecoration(
+        labelText: 'Search by Title',
+        prefixIcon: Icon(Icons.search),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+    );
+  }
+
+  // Menù per i filtri di categoria e data
+  Widget _buildFilterMenu() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        // Filtro per categoria
+        DropdownButton<String>(
+          value: selectedCategory,
+          hint: Text("Category"),
+          items: categories.map((category) {
+            return DropdownMenuItem<String>(
+              value: category,
+              child: Text(category),
+            );
+          }).toList(),
+          onChanged: (value) {
+            setState(() {
+              selectedCategory = value;
+            });
+            // Carica gli articoli dopo aver aggiornato la selezione
+            _loadArticles();
+          },
+        ),
+        
+        // Filtro per data
+        DropdownButton<String>(
+          value: selectedDate,
+          hint: Text("Date"),
+          items: dates.map((date) {
+            return DropdownMenuItem<String>(
+              value: date,
+              child: Text(date),
+            );
+          }).toList(),
+          onChanged: (value) {
+            setState(() {
+              selectedDate = value;
+            });
+            // Carica gli articoli dopo aver aggiornato la selezione
+            _loadArticles();
+          },
+        ),
+      ],
     );
   }
 }

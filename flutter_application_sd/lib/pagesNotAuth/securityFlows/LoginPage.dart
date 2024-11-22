@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_sd/pagesAuth/PersonalArea.dart';
-import 'package:flutter_application_sd/pagesNotAuth/CompaniesPage.dart';
 import 'package:flutter_application_sd/restManagers/HttpRequest.dart';
-import 'package:flutter_application_sd/widgets/CustomAppBar.dart';
 import 'package:flutter_application_sd/widgets/CustomAppBarAuthFlow%20.dart';
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -136,12 +134,9 @@ class _LoginState extends State<LoginPage> with SingleTickerProviderStateMixin {
                           return;
                         }
                         _formKey.currentState!.save();
-                        print("Email: $_email");
-                        print("Password: $_password");
 
                         String? result = await _authUser(_email!, _password!);
-
-                        if (result == null) {
+                        if (result != null) {
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(builder: (context) => PersonalArea()),
@@ -151,7 +146,6 @@ class _LoginState extends State<LoginPage> with SingleTickerProviderStateMixin {
                             context: context,
                             builder: (context) => AlertDialog(
                               title: const Text("Login Failed"),
-                              content: Text(result),
                               actions: [
                                 TextButton(
                                   onPressed: () => Navigator.pop(context),

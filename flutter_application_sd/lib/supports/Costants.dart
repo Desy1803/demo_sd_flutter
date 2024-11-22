@@ -27,5 +27,8 @@ class Constants {
   static final String PASSWORD_RESET="api/users/security/forgot-password";
   //Articles
   static final String ALL_PUBLIC_ARTICLES="api/articles/public";
-
+  static final String CREATE_ARTICLE_AUTH="api/articles";
+  static final String UPDATE_ARTICLE_AUTH="api/articles";
+  static final String DELETE_ARTICLE_AUTH="api/articles";
+  static final String GETREQUEST_GETARTICLEBYUSER="api/articles/user";
 }
