@@ -28,7 +28,7 @@ class Constants {
   //Articles
   static final String ALL_PUBLIC_ARTICLES="api/articles/public";
   static final String CREATE_ARTICLE_AUTH="api/articles";
-  static final String UPDATE_ARTICLE_AUTH="api/articles";
-  static final String DELETE_ARTICLE_AUTH="api/articles";
+  static final String UPDATE_ARTICLE_AUTH="api/articles/update";
+  static final String DELETE_ARTICLE_AUTH="api/articles/delete";
   static final String GETREQUEST_GETARTICLEBYUSER="api/articles/user";
 }

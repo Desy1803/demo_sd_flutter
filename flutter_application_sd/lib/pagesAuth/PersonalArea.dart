@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_sd/dtos/Article.dart'; 
+import 'package:flutter_application_sd/dtos/Article.dart';
 import 'package:flutter_application_sd/dtos/SearchArticleCriteria.dart';
-import 'package:flutter_application_sd/restManagers/HttpRequest.dart'; 
+import 'package:flutter_application_sd/pagesNotAuth/ArticleDetailedPage.dart';
+import 'package:flutter_application_sd/restManagers/HttpRequest.dart';
 import 'package:flutter_application_sd/widgets/CustomAppBar.dart';
-import 'WriteArticle.dart'; 
+import 'WriteArticle.dart';
 
 class PersonalArea extends StatefulWidget {
   @override
@@ -21,8 +22,8 @@ class _PersonalAreaState extends State<PersonalArea> {
   String? errorMessagePublic;
   String? errorMessagePrivate;
 
-  final List<String> categories = ['All', 'Tech', 'Health', 'Business']; 
-  final List<String> dates = ['All', 'Last Week', 'Last Month', 'Last Year']; 
+  final List<String> categories = ['All', 'Tech', 'Health', 'Business'];
+  final List<String> dates = ['All', 'Last Week', 'Last Month', 'Last Year'];
 
   @override
   void initState() {
@@ -109,6 +110,7 @@ class _PersonalAreaState extends State<PersonalArea> {
                 articles: publicArticles,
                 isLoading: isLoadingPublic,
                 errorMessage: errorMessagePublic,
+                allowEditAndDelete: false, // Disabilita edit e delete per articoli pubblici
               ),
               SizedBox(height: 24),
 
@@ -118,6 +120,7 @@ class _PersonalAreaState extends State<PersonalArea> {
                 articles: privateArticles,
                 isLoading: isLoadingPrivate,
                 errorMessage: errorMessagePrivate,
+                allowEditAndDelete: true, // Abilita edit e delete per articoli privati
               ),
             ],
           ),
@@ -191,7 +194,13 @@ class _PersonalAreaState extends State<PersonalArea> {
     );
   }
 
-  Widget _buildSection({required String title, List<Article>? articles, required bool isLoading, String? errorMessage}) {
+  Widget _buildSection({
+    required String title,
+    List<Article>? articles,
+    required bool isLoading,
+    String? errorMessage,
+    required bool allowEditAndDelete,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -211,14 +220,14 @@ class _PersonalAreaState extends State<PersonalArea> {
             physics: NeverScrollableScrollPhysics(),
             itemCount: articles.length,
             itemBuilder: (context, index) {
-              return _buildArticleCard(articles[index]);
+              return _buildArticleCard(articles[index], allowEditAndDelete);
             },
           ),
       ],
     );
   }
 
-  Widget _buildArticleCard(Article article) {
+  Widget _buildArticleCard(Article article, bool allowEditAndDelete) {
     return Card(
       margin: EdgeInsets.symmetric(vertical: 8.0),
       shape: RoundedRectangleBorder(
@@ -231,15 +240,19 @@ class _PersonalAreaState extends State<PersonalArea> {
           article.title ?? 'No Title',
           style: Theme.of(context).textTheme.subtitle1?.copyWith(fontWeight: FontWeight.bold),
         ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(article.company ?? 'No Company', style: Theme.of(context).textTheme.bodyText2)
-          ],
-        ),
+        subtitle: Text(article.company ?? 'No Company'),
         trailing: Icon(Icons.arrow_forward_ios),
         onTap: () {
-          // Azione quando l'utente seleziona un articolo
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ArticleDetailedPage(
+                article: article,
+                allowEdit: allowEditAndDelete,
+                allowDelete: allowEditAndDelete,
+              ),
+            ),
+          );
         },
       ),
     );

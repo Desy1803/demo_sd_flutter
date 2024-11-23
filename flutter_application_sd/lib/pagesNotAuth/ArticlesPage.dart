@@ -39,7 +39,6 @@ class _ArticlesPageState extends State<ArticlesPage> {
         errorMessage = null;
       });
 
-      // Creiamo l'oggetto SearchArticleCriteria per passare i parametri ai filtri
       SearchArticleCriteria searchCriteria = SearchArticleCriteria(
         title: searchQuery,
         category: selectedCategory,
@@ -189,14 +188,12 @@ class _ArticlesPageState extends State<ArticlesPage> {
     );
   }
 
-  // Barra di ricerca per il titolo
   Widget _buildSearchBar() {
     return TextField(
       onChanged: (query) {
         setState(() {
           searchQuery = query;
         });
-        // Ricarica gli articoli dopo aver aggiornato la ricerca
         _loadArticles();
       },
       decoration: InputDecoration(
@@ -247,7 +244,6 @@ class _ArticlesPageState extends State<ArticlesPage> {
             setState(() {
               selectedDate = value;
             });
-            // Carica gli articoli dopo aver aggiornato la selezione
             _loadArticles();
           },
         ),

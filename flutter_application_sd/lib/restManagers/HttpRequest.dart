@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter_application_sd/dtos/AnnualReport.dart';
 import 'package:flutter_application_sd/dtos/Article.dart';
+import 'package:flutter_application_sd/dtos/ArticleUpdate.dart';
 import 'package:flutter_application_sd/dtos/AuthenticationData.dart';
 import 'package:flutter_application_sd/dtos/Company.dart';
 import 'package:flutter_application_sd/dtos/CompanyDetails.dart';
@@ -59,8 +60,6 @@ class Model {
   Future<bool> _refreshToken(String refreshToken) async {
     Map<String, dynamic> params = {"refreshToken": refreshToken};
 
-    print("Refreshing token with params: $params");
-
     try {
       String response = await _restManager.makePostRequest(
         Constants.ADDRESS_STORE_SERVER,
@@ -98,7 +97,6 @@ class Model {
       type: TypeHeader.json,
     );
 
-    print('Raw response: $response'); 
 
     var decodedResponse = jsonDecode(response);
 
@@ -137,7 +135,6 @@ class Model {
         false,
         type: TypeHeader.json,
       );
-      print('Raw response: $response');
       return jsonDecode(response) as bool?;
     } catch (e) {
       print('Error during sending email registration: $e');
@@ -168,7 +165,6 @@ Future<bool?> sendPasswordReset(String email) async{
      Map<String, dynamic> params = {
       "email": email,
     };
-    print(email);
     try {
       final response = await _restManager.makePostRequest(
         Constants.ADDRESS_STORE_SERVER,
@@ -306,7 +302,6 @@ Future<List<Article>?> getPublicArticles({required SearchArticleCriteria criteri
     }
 
     final List<dynamic> parsed = json.decode(rawResult);
-    print("PARSED: ${parsed}");
     final List<Article>? articles = parsed.map((item) => Article.fromJson(item)).toList();
 
     print("Loaded ${articles?.length} public articles.");
@@ -374,56 +369,52 @@ Future<List<Article>> getUserArticles({required SearchArticleCriteria criteria})
   }
 
   
+Future<ArticleUpdate?> updateArticle(ArticleUpdate article) async {
+  try {
 
-  Future<Article?> updateArticle(Article article) async{
-    try {
-      Map<String, dynamic> params = article.toJson();
+    Map<String, dynamic> params = article.toJson();
+    print("Parametri ${params}");
+    String rawResult = await _restManager.makePutRequest(
+      Constants.ADDRESS_STORE_SERVER, 
+      Constants.UPDATE_ARTICLE_AUTH, 
+      true,
+      params
+    );
+    print("Raw ${rawResult}");
+    final parsed = json.decode(rawResult) as Map<String, dynamic>;
 
-      String rawResult = await _restManager.makePutRequest(
-        Constants.ADDRESS_STORE_SERVER,
-        Constants.UPDATE_ARTICLE_AUTH, 
-        true,
-        params
-      );
+    ArticleUpdate res = ArticleUpdate.fromJson(parsed);
+    print("Update article");
 
-      final parsed = json.decode(rawResult) as Map<String, dynamic>;
-  
-      Article res = Article.fromJson(parsed );
-      print("Update article");
-      
-      return res;
-    } catch (e) {
-      print('Error loading public articles: $e');
-      return null;
-    }
+    return res;
+  } catch (e) {
+    print('Error updating article: $e');
+    return null;
   }
-
-  Future<void> deleteArticle(String articleId) async{
-    try {
-      
-
-      String rawResult = await _restManager.makeDeleteRequest(
-        Constants.ADDRESS_STORE_SERVER,
-        Constants.DELETE_ARTICLE_AUTH+"?id=${articleId}", 
-        true
-      );
-
-      final parsed = json.decode(rawResult) as Map<String, dynamic>;
-  
-      Article res = Article.fromJson(parsed );
-      print("Delete article");
-      
-      return null;
-    } catch (e) {
-      print('Error loading public articles: $e');
-      return null;
-    }
-  }
-
-  
-
-
-  
-
 }
 
+
+
+Future<void> deleteArticle(int articleId) async {
+  try {
+    Map<String, dynamic> params = {
+      "id": articleId,
+    };
+    String endpoint = "${Constants.DELETE_ARTICLE_AUTH}";
+
+    String rawResult = await _restManager.makeDeleteRequest(
+      Constants.ADDRESS_STORE_SERVER, 
+      endpoint, 
+      true,
+      params
+    );
+
+    final parsed = json.decode(rawResult) as Map<String, dynamic>;
+
+    print("Delete article");
+
+  } catch (e) {
+    print('Error deleting article: $e');
+  }
+}
+}

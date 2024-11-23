@@ -25,6 +25,7 @@ class RestManager {
   }) async {
     
     Uri uri = Uri.http(serverAddress, servicePath, value);
+    print("${uri}");
     bool errorOccurred = false;
     int maxRetries = 3; 
     int attempts = 0;
@@ -50,7 +51,7 @@ class RestManager {
         if (useToken && _token != null) {
           headers[HttpHeaders.authorizationHeader] = "Bearer $_token"; 
         }
-        print("Request: ${formattedBody} and ${headers}");
+        print("Request: ${formattedBody} and ${headers} and method {$method}");
         switch (method.toLowerCase()) {
           case "post":
             response = await post(uri, headers: headers, body: formattedBody);
@@ -110,7 +111,7 @@ class RestManager {
 
   Future<String> makeDeleteRequest(
     String serverAddress, String servicePath, bool useToken,
-    [Map<String, String>? value, TypeHeader? type]
+    [Map<String, dynamic>? value, TypeHeader? type]
   ) async {
     return _makeRequest(serverAddress, servicePath, "delete", type, value: value, useToken: useToken);
   }

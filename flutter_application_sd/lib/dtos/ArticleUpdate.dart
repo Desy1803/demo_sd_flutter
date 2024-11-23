@@ -1,8 +1,8 @@
-class Article {
+class ArticleUpdate {
   final int id;
-  String title;
-  String description;
-  String company;
+   String title;
+  final String description;
+  final String company;
   final String author;
   final String? imageUrl; // Può essere null
   final String? timeUnit; // Cambiato a String? per gestire i valori null
@@ -11,7 +11,7 @@ class Article {
   final bool isPublic;
   final bool isAI;
 
-  Article({
+  ArticleUpdate({
     required this.id,
     required this.title,
     required this.description,
@@ -25,8 +25,8 @@ class Article {
     required this.isAI,
   });
 
-  factory Article.fromJson(Map<String, dynamic> json) {
-    return Article(
+  factory ArticleUpdate.fromJson(Map<String, dynamic> json) {
+    return ArticleUpdate(
       id: json['id'],
       title: json['title'] ?? '', 
       description: json['description'] ?? '',
@@ -42,18 +42,19 @@ class Article {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'title': title,
-      'description': description,
-      'company': company,
-      'author': author,
-      'imageUrl': imageUrl,
-      'timeUnit': timeUnit, 
-      'createdAt': createdAt?.toIso8601String(),
-      'updatedAt': updatedAt?.toIso8601String(),
-      'public': isPublic,
-      'ai': isAI,
-    };
-  }
+  return {
+    'id': id?.toString() ?? '',  // Converte in stringa, se null mette una stringa vuota
+    'title': title ?? '',  // Se title è null, assegna ''
+    'description': description ?? '',  // Se description è null, assegna ''
+    'company': company ?? '',  // Se company è null, assegna ''
+    'author': author ?? '',  // Se author è null, assegna ''
+    'imageUrl': imageUrl ?? '',  // Se imageUrl è null, assegna ''
+    'timeUnit': timeUnit ?? '',  // Se timeUnit è null, assegna ''
+    'createdAt': createdAt?.toIso8601String() ?? '',  // Se createdAt è null, assegna ''
+    'updatedAt': updatedAt?.toIso8601String() ?? '',  // Se updatedAt è null, assegna ''
+    'public': isPublic?.toString() ?? '',  // Se isPublic è null, assegna ''
+    'ai': isAI?.toString() ?? '',  // Se isAI è null, assegna ''
+  };
+}
+
 }
