@@ -25,7 +25,6 @@ class RestManager {
   }) async {
     
     Uri uri = Uri.http(serverAddress, servicePath, value);
-    print("${uri}");
     bool errorOccurred = false;
     int maxRetries = 3; 
     int attempts = 0;
@@ -42,8 +41,8 @@ class RestManager {
         } else if (type == TypeHeader.urlencoded) {
           contentType = "application/x-www-form-urlencoded";
           formattedBody = body != null ? body.keys.map((key) => "$key=${Uri.encodeComponent(body[key])}").join("&") : null;
-        }
-
+        }        
+       
         Map<String, String> headers = {};
         if (contentType.isNotEmpty) {
           headers[HttpHeaders.contentTypeHeader] = contentType;
@@ -51,7 +50,6 @@ class RestManager {
         if (useToken && _token != null) {
           headers[HttpHeaders.authorizationHeader] = "Bearer $_token"; 
         }
-        print("Request: ${formattedBody} and ${headers} and method {$method}");
         switch (method.toLowerCase()) {
           case "post":
             response = await post(uri, headers: headers, body: formattedBody);

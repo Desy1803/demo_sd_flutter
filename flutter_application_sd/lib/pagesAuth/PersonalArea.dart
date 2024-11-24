@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_sd/dtos/Article.dart';
+import 'package:flutter_application_sd/dtos/ArticleResponse.dart';
 import 'package:flutter_application_sd/dtos/SearchArticleCriteria.dart';
 import 'package:flutter_application_sd/pagesNotAuth/ArticleDetailedPage.dart';
 import 'package:flutter_application_sd/restManagers/HttpRequest.dart';
@@ -12,8 +12,7 @@ class PersonalArea extends StatefulWidget {
 }
 
 class _PersonalAreaState extends State<PersonalArea> {
-  List<Article>? publicArticles;
-  List<Article>? privateArticles;
+  List<ArticleResponse>? yourArticles;
   String searchQuery = "";
   String? selectedCategory;
   String? selectedDate;
@@ -28,11 +27,10 @@ class _PersonalAreaState extends State<PersonalArea> {
   @override
   void initState() {
     super.initState();
-    _loadPublicArticles();
-    _loadPrivateArticles();
+    _loadYourArticles();
   }
 
-  Future<void> _loadPublicArticles() async {
+  Future<void> _loadYourArticles() async {
     setState(() {
       isLoadingPublic = true;
       errorMessagePublic = null;
@@ -42,12 +40,13 @@ class _PersonalAreaState extends State<PersonalArea> {
       title: searchQuery,
       category: selectedCategory,
       date: selectedDate,
+      isPublic: null
     );
 
     try {
-      List<Article>? publicArticlesResult = await Model.sharedInstance.getPublicArticles(criteria: searchCriteria);
+      List<ArticleResponse>? yourArticlesResult = await Model.sharedInstance.getUserArticles(criteria: searchCriteria);
       setState(() {
-        publicArticles = publicArticlesResult ?? [];
+        yourArticles = yourArticlesResult ?? [];
       });
     } catch (e) {
       setState(() {
@@ -60,33 +59,7 @@ class _PersonalAreaState extends State<PersonalArea> {
     }
   }
 
-  Future<void> _loadPrivateArticles() async {
-    setState(() {
-      isLoadingPrivate = true;
-      errorMessagePrivate = null;
-    });
-
-    SearchArticleCriteria searchCriteria = SearchArticleCriteria(
-      title: searchQuery,
-      category: selectedCategory,
-      date: selectedDate,
-    );
-
-    try {
-      List<Article>? privateArticlesResult = await Model.sharedInstance.getUserArticles(criteria: searchCriteria);
-      setState(() {
-        privateArticles = privateArticlesResult ?? [];
-      });
-    } catch (e) {
-      setState(() {
-        errorMessagePrivate = 'Error loading private articles: ${e.toString()}';
-      });
-    } finally {
-      setState(() {
-        isLoadingPrivate = false;
-      });
-    }
-  }
+ 
 
   @override
   Widget build(BuildContext context) {
@@ -98,30 +71,19 @@ class _PersonalAreaState extends State<PersonalArea> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Barra di ricerca
               _buildSearchBar(),
 
-              // Menù per i filtri
               _buildFilterMenu(),
-
-              // Sezione per articoli pubblici
               _buildSection(
-                title: "Public Articles",
-                articles: publicArticles,
+                title: "Your Articles",
+                articles: yourArticles,
                 isLoading: isLoadingPublic,
                 errorMessage: errorMessagePublic,
-                allowEditAndDelete: false, // Disabilita edit e delete per articoli pubblici
+                allowEditAndDelete: true,
               ),
               SizedBox(height: 24),
 
-              // Sezione per articoli privati
-              _buildSection(
-                title: "Private Articles",
-                articles: privateArticles,
-                isLoading: isLoadingPrivate,
-                errorMessage: errorMessagePrivate,
-                allowEditAndDelete: true, // Abilita edit e delete per articoli privati
-              ),
+             
             ],
           ),
         ),
@@ -143,8 +105,7 @@ class _PersonalAreaState extends State<PersonalArea> {
     return TextField(
       onChanged: (query) async {
         searchQuery = query;
-        _loadPublicArticles();
-        _loadPrivateArticles();
+        _loadYourArticles();
       },
       decoration: InputDecoration(
         labelText: 'Search by Title',
@@ -171,8 +132,7 @@ class _PersonalAreaState extends State<PersonalArea> {
           }).toList(),
           onChanged: (value) async {
             selectedCategory = value;
-            _loadPublicArticles();
-            _loadPrivateArticles();
+            _loadYourArticles();
           },
         ),
         DropdownButton<String>(
@@ -186,8 +146,7 @@ class _PersonalAreaState extends State<PersonalArea> {
           }).toList(),
           onChanged: (value) async {
             selectedDate = value;
-            _loadPublicArticles();
-            _loadPrivateArticles();
+            _loadYourArticles();
           },
         ),
       ],
@@ -196,7 +155,7 @@ class _PersonalAreaState extends State<PersonalArea> {
 
   Widget _buildSection({
     required String title,
-    List<Article>? articles,
+    List<ArticleResponse>? articles,
     required bool isLoading,
     String? errorMessage,
     required bool allowEditAndDelete,
@@ -227,7 +186,7 @@ class _PersonalAreaState extends State<PersonalArea> {
     );
   }
 
-  Widget _buildArticleCard(Article article, bool allowEditAndDelete) {
+  Widget _buildArticleCard(ArticleResponse article, bool allowEditAndDelete) {
     return Card(
       margin: EdgeInsets.symmetric(vertical: 8.0),
       shape: RoundedRectangleBorder(

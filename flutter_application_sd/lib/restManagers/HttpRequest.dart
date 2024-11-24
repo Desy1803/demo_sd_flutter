@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter_application_sd/dtos/AnnualReport.dart';
 import 'package:flutter_application_sd/dtos/Article.dart';
+import 'package:flutter_application_sd/dtos/ArticleResponse.dart';
 import 'package:flutter_application_sd/dtos/ArticleUpdate.dart';
 import 'package:flutter_application_sd/dtos/AuthenticationData.dart';
 import 'package:flutter_application_sd/dtos/Company.dart';
@@ -283,7 +285,9 @@ Future<bool?> sendPasswordReset(String email) async{
       return null;
     }
   }
-Future<List<Article>?> getPublicArticles({required SearchArticleCriteria criteria}) async {
+//Articles
+  
+Future<List<ArticleResponse>?> getPublicArticles({required SearchArticleCriteria criteria}) async {
   try {
     final String endpoint = Constants.ALL_PUBLIC_ARTICLES;
     
@@ -300,12 +304,17 @@ Future<List<Article>?> getPublicArticles({required SearchArticleCriteria criteri
     if (rawResult.isEmpty) {
       throw Exception("Empty response from server for public articles.");
     }
+    final dynamic parsed = json.decode(rawResult);
 
-    final List<dynamic> parsed = json.decode(rawResult);
-    final List<Article>? articles = parsed.map((item) => Article.fromJson(item)).toList();
-
-    print("Loaded ${articles?.length} public articles.");
-    return articles;
+    if (parsed is List) {
+      List<ArticleResponse> articles = parsed.map((item) => ArticleResponse.fromJson(item)).toList();
+      
+      print("Loaded ${articles.length} public articles.");
+      return articles;
+    }else {
+      print("Error: Expected a list of articles, but got: $parsed");
+      return [];
+    }
   } catch (e, stacktrace) {
     print('Error loading public articles: $e');
     print('Stacktrace: $stacktrace');
@@ -313,7 +322,7 @@ Future<List<Article>?> getPublicArticles({required SearchArticleCriteria criteri
   }
 }
 
-Future<List<Article>> getUserArticles({required SearchArticleCriteria criteria}) async {
+Future<List<ArticleResponse>> getUserArticles({required SearchArticleCriteria criteria}) async {
   try {
     final String endpoint = Constants.GETREQUEST_GETARTICLEBYUSER;
     
@@ -331,7 +340,7 @@ Future<List<Article>> getUserArticles({required SearchArticleCriteria criteria})
     }
 
     final List<dynamic> parsed = json.decode(rawResult);
-    final List<Article> articles = parsed.map((item) => Article.fromJson(item)).toList();
+    final List<ArticleResponse> articles = parsed.map((item) => ArticleResponse.fromJson(item)).toList();
 
     print("Loaded ${articles.length} user articles.");
     return articles;
@@ -373,7 +382,6 @@ Future<ArticleUpdate?> updateArticle(ArticleUpdate article) async {
   try {
 
     Map<String, dynamic> params = article.toJson();
-    print("Parametri ${params}");
     String rawResult = await _restManager.makePutRequest(
       Constants.ADDRESS_STORE_SERVER, 
       Constants.UPDATE_ARTICLE_AUTH, 
@@ -397,7 +405,7 @@ Future<ArticleUpdate?> updateArticle(ArticleUpdate article) async {
 
 Future<void> deleteArticle(int articleId) async {
   try {
-    Map<String, dynamic> params = {
+    Map<String, int> params = {
       "id": articleId,
     };
     String endpoint = "${Constants.DELETE_ARTICLE_AUTH}";
@@ -417,4 +425,35 @@ Future<void> deleteArticle(int articleId) async {
     print('Error deleting article: $e');
   }
 }
+
+  fetchAIArticle(String aiType) {}
+
+  Future<Uint8List?> fetchArticleImage(int articleId) async {
+  try {
+    // Endpoint per ottenere l'immagine
+    String endpoint = "${Constants.GETIMAGE_ARTICLE}";
+   
+    Map<String, dynamic> queryParams = {
+      'articleId': articleId.toString(),  // Passiamo l'ID come int direttamente
+    };
+    String rawResult = await _restManager.makeGetRequest(
+      Constants.ADDRESS_STORE_SERVER, 
+      endpoint, 
+      false,
+      queryParams 
+    );
+    
+    print("Raw result from image: $rawResult");
+
+    final parsed = base64.decode(rawResult);
+    print("Parsed: $parsed");
+
+    return Uint8List.fromList(parsed);
+
+  } catch (e) {
+    print('Error image article: $e');
+    return null;  
+  }
+}
+
 }

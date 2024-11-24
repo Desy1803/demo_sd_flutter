@@ -31,4 +31,5 @@ class Constants {
   static final String UPDATE_ARTICLE_AUTH="api/articles/update";
   static final String DELETE_ARTICLE_AUTH="api/articles/delete";
   static final String GETREQUEST_GETARTICLEBYUSER="api/articles/user";
+  static final String GETIMAGE_ARTICLE="api/articles/get-image";
 }

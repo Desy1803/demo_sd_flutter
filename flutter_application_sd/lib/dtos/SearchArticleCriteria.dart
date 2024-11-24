@@ -2,8 +2,8 @@ class SearchArticleCriteria {
   String? id;
   String? title;
   String? company;
-  bool? isPublic;  
-  bool? isAi;
+  String? isPublic;  
+  String? isAi;
   String? date;
   String? user;  
   String? category;

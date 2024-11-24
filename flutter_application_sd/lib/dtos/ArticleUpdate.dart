@@ -1,11 +1,11 @@
 class ArticleUpdate {
   final int id;
-   String title;
+  String title;
   final String description;
   final String company;
   final String author;
-  final String? imageUrl; // Può essere null
-  final String? timeUnit; // Cambiato a String? per gestire i valori null
+  final String? imageUrl; 
+  final String? timeUnit; 
   final DateTime? createdAt;
   final DateTime? updatedAt;
   final bool isPublic;
@@ -18,7 +18,7 @@ class ArticleUpdate {
     required this.company,
     required this.author,
     this.imageUrl,
-    this.timeUnit, // Non richiesto ora
+    this.timeUnit, 
     this.createdAt,
     this.updatedAt,
     required this.isPublic,
@@ -43,17 +43,17 @@ class ArticleUpdate {
 
   Map<String, dynamic> toJson() {
   return {
-    'id': id?.toString() ?? '',  // Converte in stringa, se null mette una stringa vuota
-    'title': title ?? '',  // Se title è null, assegna ''
-    'description': description ?? '',  // Se description è null, assegna ''
-    'company': company ?? '',  // Se company è null, assegna ''
-    'author': author ?? '',  // Se author è null, assegna ''
-    'imageUrl': imageUrl ?? '',  // Se imageUrl è null, assegna ''
-    'timeUnit': timeUnit ?? '',  // Se timeUnit è null, assegna ''
-    'createdAt': createdAt?.toIso8601String() ?? '',  // Se createdAt è null, assegna ''
-    'updatedAt': updatedAt?.toIso8601String() ?? '',  // Se updatedAt è null, assegna ''
-    'public': isPublic?.toString() ?? '',  // Se isPublic è null, assegna ''
-    'ai': isAI?.toString() ?? '',  // Se isAI è null, assegna ''
+    'id': id?.toString() ?? '', 
+    'title': title ?? '',  
+    'description': description ?? '',  
+    'company': company ?? '',  
+    'author': author ?? '',  
+    'imageUrl': imageUrl ?? '',  
+    'timeUnit': timeUnit ?? '',  
+    'createdAt': createdAt?.toIso8601String() ?? '', 
+    'updatedAt': updatedAt?.toIso8601String() ?? '',  
+    'public': isPublic?.toString() ?? '',  
+    'ai': isAI?.toString() ?? '', 
   };
 }
 

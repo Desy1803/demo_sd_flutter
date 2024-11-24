@@ -1,9 +1,10 @@
+import 'dart:convert';
+import 'dart:html' as html;
 import 'package:flutter/material.dart';
 import 'package:flutter_application_sd/dtos/Article.dart';
-
+import 'package:flutter_application_sd/forms/ArticleForm.dart';
 import 'package:flutter_application_sd/restManagers/HttpRequest.dart';
-import 'package:flutter_application_sd/widgets/DropZoneWidget.dart'; 
-import 'dart:html' as html;
+import 'package:flutter_application_sd/widgets/CustomAppBar.dart';
 
 class WriteArticlePage extends StatefulWidget {
   @override
@@ -15,30 +16,51 @@ class _WriteArticlePageState extends State<WriteArticlePage> {
   TextEditingController companyController = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
   TextEditingController fiscalYearController = TextEditingController();
+  TextEditingController categoryController = TextEditingController();
 
-  String imageUrl = '';  
-  bool isPublic = true;  
-  bool isAIEnabled = false;  
-  String articleType = '';  
-  String selectedCompany = '';
-  String selectedFiscalYear = '';
+  String? imagePreviewUrl;
+  String imageUrl = '';
+  bool isPublic = true;
+  bool isAIEnabled = false;
 
   Future<void> saveArticle() async {
-    Article article = new Article(
-      id: 1, 
-      title: titleController.text, 
-      description: descriptionController.text, 
-      company: companyController.text, 
-      author: "author", 
-      timeUnit: fiscalYearController.text, 
-      isPublic: isPublic, 
-      isAI: isAIEnabled ,
-      imageUrl: imageUrl
+    if (titleController.text.isEmpty ||
+        companyController.text.isEmpty ||
+        descriptionController.text.isEmpty ||
+        fiscalYearController.text.isEmpty ||
+        categoryController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please fill in all required fields.')),
+      );
+      return;
+    }
+
+    Article article = Article(
+      id: 1,
+      title: titleController.text,
+      description: descriptionController.text,
+      company: companyController.text,
+      author: "author",
+      timeUnit: fiscalYearController.text,
+      isPublic: isPublic,
+      isAI: isAIEnabled,
+      imageUrl: imageUrl,
+      category: categoryController.text,
     );
-    Article? articleRet = await Model.sharedInstance.createArticle(article);
+
+    try {
+      Article? articleRet = await Model.sharedInstance.createArticle(article);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Article saved successfully!')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to save article: $e')),
+      );
+    }
   }
 
-  void createWithAI() {
+  Future<void> createWithAI() async {
     showDialog(
       context: context,
       builder: (context) {
@@ -50,21 +72,15 @@ class _WriteArticlePageState extends State<WriteArticlePage> {
               ListTile(
                 title: Text('Create your article on Fundamental Data'),
                 onTap: () {
-                  setState(() {
-                    articleType = 'FUNDAMENTAL';
-                  });
                   Navigator.pop(context);
-                  openCompanyYearSelection();
+                  fetchAIData('FUNDAMENTAL');
                 },
               ),
               ListTile(
                 title: Text('Create your article with Data Analysis'),
                 onTap: () {
-                  setState(() {
-                    articleType = 'ANALYSIS';
-                  });
                   Navigator.pop(context);
-                  openCompanyYearSelection();
+                  fetchAIData('ANALYSIS');
                 },
               ),
             ],
@@ -74,123 +90,89 @@ class _WriteArticlePageState extends State<WriteArticlePage> {
     );
   }
 
-  void openCompanyYearSelection() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('Select Company and Fiscal Year'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                decoration: InputDecoration(labelText: "Company"),
-                onChanged: (value) {
-                  selectedCompany = value;
-                },
-              ),
-              TextField(
-                decoration: InputDecoration(labelText: "Fiscal Year"),
-                onChanged: (value) {
-                  selectedFiscalYear = value;
-                },
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                      print('Creating article with $articleType for company $selectedCompany and fiscal year $selectedFiscalYear');
-                    },
-                    child: Text('Create'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: Text('Cancel'),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        );
-      },
-    );
+  Future<void> fetchAIData(String aiType) async {
+    // Mock API call to fetch AI-generated data
+    try {
+      final response = await Model.sharedInstance.fetchAIArticle(aiType);
+      setState(() {
+        titleController.text = response.title;
+        descriptionController.text = response.description;
+        companyController.text = response.company;
+        fiscalYearController.text = response.timeUnit;
+        categoryController.text = response.category;
+        isAIEnabled = true;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('AI Data Loaded')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to fetch AI data: $e')),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Write Article')),
+      appBar: CustomAppBar(),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextField(
-              controller: titleController,
-              decoration: InputDecoration(labelText: "Title"),
-            ),
-            TextField(
-              controller: companyController,
-              decoration: InputDecoration(labelText: "Company"),
-            ),
-            TextField(
-              controller: descriptionController,
-              decoration: InputDecoration(labelText: "Description"),
-              maxLines: 5,
-            ),
-            TextField(
-              controller: fiscalYearController,
-              decoration: InputDecoration(labelText: "Fiscal Year"),
-              keyboardType: TextInputType.number,
-            ),
-            SizedBox(height: 16),
-            DropZoneWidget(
-              onDrop: (List<html.File>? files) {
-                if (files != null && files.isNotEmpty) {
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ArticleForm(
+                titleController: titleController,
+                companyController: companyController,
+                descriptionController: descriptionController,
+                fiscalYearController: fiscalYearController,
+                categoryController: categoryController,
+                imagePreviewUrl: imagePreviewUrl,
+                onImageSelected: (dataUrl) {
                   setState(() {
-                    imageUrl = files.first.name;  // Salva il nome dell'immagine
+                    imagePreviewUrl = dataUrl;
+                    imageUrl = dataUrl.split(',').last;
                   });
-                }
-              },
-            ),
-            Row(
-              children: [
-                Checkbox(
-                  value: isPublic,
-                  onChanged: (value) {
-                    setState(() {
-                      isPublic = value!;
-                    });
-                  },
-                ),
-                Text('Public Article'),
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                ElevatedButton(
-                  onPressed: saveArticle,
-                  child: Text("Save Article"),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      isAIEnabled = !isAIEnabled;
-                    });
-                    if (isAIEnabled) {
-                      createWithAI();  // Chiamata per creare con AI
-                    }
-                  },
-                  child: Text(isAIEnabled ? "Cancel AI Flow" : "Create with AI"),
-                ),
-              ],
-            ),
-          ],
+                },
+                isReadonly: isAIEnabled,
+              ),
+              Row(
+                children: [
+                  Checkbox(
+                    value: isPublic,
+                    onChanged: isAIEnabled
+                        ? null
+                        : (value) {
+                            setState(() {
+                              isPublic = value!;
+                            });
+                          },
+                  ),
+                  Text('Public Article'),
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      primary: Color(0xFF001F3F),
+                    ),
+                    onPressed: saveArticle,
+                    child: Text("Save Article"),
+                  ),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      primary: Color(0xFF001F3F),
+                    ),
+                    onPressed: isAIEnabled ? null : createWithAI,
+                    child: Text(isAIEnabled ? "AI Enabled" : "Create with AI"),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

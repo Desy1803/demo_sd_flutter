@@ -1,10 +1,13 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
-import 'package:flutter_application_sd/dtos/Article.dart';
+import 'package:flutter_application_sd/dtos/ArticleResponse.dart';
 import 'package:flutter_application_sd/dtos/ArticleUpdate.dart';
 import 'package:flutter_application_sd/restManagers/HttpRequest.dart';
 import 'package:flutter_application_sd/widgets/CustomAppBar.dart';
+
 class ArticleDetailedPage extends StatefulWidget {
-  Article article;
+  final ArticleResponse article;
   final bool allowEdit; // Permette la visibilità della penna
   final bool allowDelete; // Permette la visibilità del cestino
 
@@ -36,7 +39,6 @@ class _ArticleDetailedPageState extends State<ArticleDetailedPage> {
 
   @override
   void dispose() {
-    // Disposizione dei controller per liberare risorse
     titleController.dispose();
     descriptionController.dispose();
     companyController.dispose();
@@ -45,37 +47,38 @@ class _ArticleDetailedPageState extends State<ArticleDetailedPage> {
 
   void _updateArticle() async {
     try {
-      // Creazione di un nuovo articolo con i dati modificati
+      
       ArticleUpdate updatedArticle = ArticleUpdate(
-        id: widget.article.id, // Manteniamo l'ID originale
+        id: widget.article.id, 
         title: titleController.text,
         description: descriptionController.text,
         company: companyController.text,
-        author: widget.article.author, // Manteniamo l'autore originale
-        isPublic: widget.article.isPublic, // Manteniamo il flag originale
-        isAI: widget.article.isAI, // Manteniamo il flag originale
-        imageUrl: widget.article.imageUrl, // Manteniamo l'immagine originale
+        author: widget.article.authorUsername, 
+        isPublic: widget.article.isPublic, 
+        isAI: widget.article.isAi, 
       );
 
-      // Effettua la chiamata per aggiornare l'articolo
       ArticleUpdate? newArticle = await Model.sharedInstance.updateArticle(updatedArticle);
 
-      // Aggiorna lo stato con l'articolo restituito dal back-end
       setState(() {
         widget.article.title = newArticle!.title;
         widget.article.description = newArticle.description;
         widget.article.company = newArticle.company;
-        isEditing = false; // Disattiviamo la modalità di modifica
+        isEditing = false; 
       });
 
-      // Notifica di successo
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Article updated successfully!')),
+        const SnackBar(
+          content: Text('Article updated successfully!'),
+          backgroundColor: Color.fromARGB(255, 197, 202, 233),
+        ),
       );
     } catch (e) {
-      // Gestione errori
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to update article: $e')),
+        SnackBar(
+          content: Text('Failed to update article: $e'),
+          backgroundColor: Color.fromARGB(255, 169, 13, 13),
+        ),
       );
     }
   }
@@ -103,7 +106,7 @@ class _ArticleDetailedPageState extends State<ArticleDetailedPage> {
 
     if (confirmed == true) {
       try {
-        await Model.sharedInstance.deleteArticle(widget.article.id);
+        await Model.sharedInstance.deleteArticle(widget.article.id);  
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Article deleted successfully!')),
         );
@@ -133,34 +136,35 @@ class _ArticleDetailedPageState extends State<ArticleDetailedPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Immagine o placeholder
-                  if (widget.article.imageUrl != null)
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(12.0),
-                      child: Image.network(
-                        widget.article.imageUrl!,
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                        height: 200,
-                      ),
-                    )
-                  else
-                    Container(
-                      width: double.infinity,
-                      height: 200,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[300],
-                        borderRadius: BorderRadius.circular(12.0),
-                      ),
-                      child: const Icon(
-                        Icons.image_not_supported,
-                        size: 50,
-                        color: Colors.grey,
-                      ),
-                    ),
+                  FutureBuilder<Uint8List?>(
+                          future: Model.sharedInstance.fetchArticleImage(widget.article.id), 
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState == ConnectionState.waiting) {
+                              return const Center(child: CircularProgressIndicator());
+                            } else if (snapshot.hasError) {
+                              return Center(child: Text('Error loading image'));
+                            } else if (snapshot.hasData) {
+                              if (snapshot.data != null) {
+                                return ClipRRect(
+                                  borderRadius: BorderRadius.circular(12.0),
+                                  child: Image.memory(
+                                    snapshot.data!,
+                                    fit: BoxFit.cover,
+                                    width: double.infinity,
+                                    height: 200,
+                                  ),
+                                );
+                              } else {
+                                return const Center(child: Text('No image found'));
+                              }
+                            } else {
+                              return const Center(child: Text('No image available'));
+                            }
+                          },
+                        ),
+                  
                   const SizedBox(height: 16.0),
 
-                  // Titolo (editable se in modalità editing)
                   isEditing
                       ? TextField(
                           controller: titleController,
@@ -173,7 +177,6 @@ class _ArticleDetailedPageState extends State<ArticleDetailedPage> {
                         ),
                   const SizedBox(height: 8.0),
 
-                  // Descrizione (editable se in modalità editing)
                   isEditing
                       ? TextField(
                           controller: descriptionController,
@@ -187,7 +190,6 @@ class _ArticleDetailedPageState extends State<ArticleDetailedPage> {
                         ),
                   const SizedBox(height: 8.0),
 
-                  // Azienda (editable se in modalità editing)
                   isEditing
                       ? TextField(
                           controller: companyController,
@@ -202,12 +204,14 @@ class _ArticleDetailedPageState extends State<ArticleDetailedPage> {
 
                   // Autore (non modificabile)
                   Text(
-                    'Author: ${widget.article.author}',
+                    'Author username: ${widget.article.authorUsername }',
                     style: const TextStyle(fontSize: 16.0, fontStyle: FontStyle.italic),
                   ),
                   const SizedBox(height: 16.0),
-
-                  // Chips informazioni (Public/Private, AI-generated/Human-generated)
+                  Text(
+                    'Author email: ${widget.article.authorEmail }',
+                    style: const TextStyle(fontSize: 16.0, fontStyle: FontStyle.italic),
+                  ),
                   Row(
                     children: [
                       _buildInfoChip(
@@ -220,8 +224,8 @@ class _ArticleDetailedPageState extends State<ArticleDetailedPage> {
                       _buildInfoChip(
                         context,
                         icon: Icons.smart_toy_outlined,
-                        label: widget.article.isAI == true ? 'AI-generated' : 'Human-generated',
-                        color: widget.article.isAI == true ? Colors.blue : Colors.orange,
+                        label: widget.article.isAi == true ? 'AI-generated' : 'Human-generated',
+                        color: widget.article.isAi == true ? Colors.blue : Colors.orange,
                       ),
                     ],
                   ),

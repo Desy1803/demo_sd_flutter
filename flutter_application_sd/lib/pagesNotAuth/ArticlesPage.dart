@@ -1,7 +1,7 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_sd/dtos/Article.dart';
+import 'package:flutter_application_sd/dtos/ArticleResponse.dart';
 import 'package:flutter_application_sd/dtos/SearchArticleCriteria.dart';
+import 'package:flutter_application_sd/pagesAuth/WriteArticle.dart';
 import 'package:flutter_application_sd/pagesNotAuth/ArticleDetailedPage.dart';
 import 'package:flutter_application_sd/restManagers/HttpRequest.dart';
 import 'package:flutter_application_sd/widgets/CustomAppBar.dart';
@@ -14,13 +14,12 @@ class ArticlesPage extends StatefulWidget {
 }
 
 class _ArticlesPageState extends State<ArticlesPage> {
-  List<Article> articles = [];
-  int? tappedIndex;
-  bool isLoading = true;
-  String? errorMessage;
+  List<ArticleResponse>? articles = [];
   String searchQuery = "";
   String? selectedCategory;
   String? selectedDate;
+  bool isLoading = true;
+  String? errorMessage;
 
   // Aggiungi le categorie e le date per i filtri
   final List<String> categories = ['All', 'Tech', 'Health', 'Business'];
@@ -33,161 +32,77 @@ class _ArticlesPageState extends State<ArticlesPage> {
   }
 
   Future<void> _loadArticles() async {
-    try {
-      setState(() {
-        isLoading = true;
-        errorMessage = null;
-      });
+  try {
+    setState(() {
+      isLoading = true;
+      errorMessage = null;
+    });
 
-      SearchArticleCriteria searchCriteria = SearchArticleCriteria(
-        title: searchQuery,
-        category: selectedCategory,
-        date: selectedDate,
-      );
+    SearchArticleCriteria searchCriteria = SearchArticleCriteria(
+      title: searchQuery,
+      category: selectedCategory,
+      date: selectedDate,
+    );
 
-      // Carichiamo gli articoli pubblici con i filtri
-      List<Article>? loadedArticles = await Model.sharedInstance.getPublicArticles(
-        criteria: searchCriteria
-      );
+    // Carica gli articoli
+    List<ArticleResponse>? loadedArticles = await Model.sharedInstance.getPublicArticles(
+      criteria: searchCriteria,
+    );
 
-      setState(() {
-        if (loadedArticles != null && loadedArticles.isNotEmpty) {
-          articles = loadedArticles..sort((a, b) => a.title.compareTo(b.title));
-        } else {
-          errorMessage = 'No articles found.';
-        }
-        isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        errorMessage = 'Error loading articles: ${e.toString()}';
-        isLoading = false;
-      });
-      print('Error loading articles: $e');
-    }
+    // Gestisci il risultato
+    setState(() {
+      if (loadedArticles != null && loadedArticles.isNotEmpty) {
+        // Ordina gli articoli per titolo
+        articles = loadedArticles..sort((a, b) => a.title.compareTo(b.title));
+      } else {
+        errorMessage = 'No articles found.';
+      }
+      isLoading = false;
+    });
+  } catch (e) {
+    // Gestisci eventuali errori
+    setState(() {
+      errorMessage = 'Error loading articles: ${e.toString()}';
+      isLoading = false;
+    });
+    print('Error loading articles: $e');
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : errorMessage != null
-              ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Text(
-                      errorMessage!,
-                      style: const TextStyle(
-                        fontSize: 16.0,
-                        color: Colors.red,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                )
-              : articles.isEmpty
-                  ? const Center(
-                      child: Text(
-                        'No articles available.',
-                        style: TextStyle(fontSize: 16.0),
-                      ),
-                    )
-                  : GridView.builder(
-                      padding: const EdgeInsets.all(8.0),
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,  // Due articoli per riga
-                        childAspectRatio: 0.65,  // Ridurre la dimensione del riquadro
-                        crossAxisSpacing: 6.0,  // Spazio più piccolo tra gli articoli
-                        mainAxisSpacing: 6.0,  // Spazio più piccolo tra le righe
-                      ),
-                      itemCount: articles.length,
-                      itemBuilder: (context, index) {
-                        Article article = articles[index];
-
-                        return GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              tappedIndex = index;
-                            });
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ArticleDetailedPage(article: article),
-                              ),
-                            ).then((_) {
-                              setState(() {
-                                tappedIndex = null;
-                              });
-                            });
-                          },
-                          child: Card(
-                            elevation: 4,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12.0),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Expanded(
-                                  child: ClipRRect(
-                                    borderRadius: const BorderRadius.only(
-                                      topLeft: Radius.circular(12.0),
-                                      topRight: Radius.circular(12.0),
-                                    ),
-                                    child: article.imageUrl != null
-                                        ? Image.network(
-                                            article.imageUrl!,
-                                            fit: BoxFit.cover,
-                                            width: double.infinity,
-                                          )
-                                        : Container(
-                                            color: Colors.grey[200],
-                                            child: const Center(
-                                              child: Icon(
-                                                Icons.image_not_supported,
-                                                size: 10.0,
-                                                color: Colors.grey,
-                                              ),
-                                            ),
-                                          ),
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Text(
-                                    article.title,
-                                    style: const TextStyle(
-                                      fontSize: 16.0,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                                  child: Text(
-                                    article.description ?? 'No description available.',
-                                    style: const TextStyle(
-                                      fontSize: 14.0,
-                                      color: Colors.grey,
-                                    ),
-                                    maxLines: 3,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                                const SizedBox(height: 8.0),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    ),
+      appBar: CustomAppBar(showBackButton: true),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildSearchBar(),
+              SizedBox(height: 16.0),
+              _buildFilterMenu(),
+              SizedBox(height: 24.0),
+              _buildArticleSection(),
+            ],
+          ),
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => WriteArticlePage()),
+          );
+        },
+        child: Icon(Icons.edit),
+        backgroundColor: Color(0xFF001F3F),
+      ),
     );
   }
 
+  // Costruzione della barra di ricerca
   Widget _buildSearchBar() {
     return TextField(
       onChanged: (query) {
@@ -206,12 +121,11 @@ class _ArticlesPageState extends State<ArticlesPage> {
     );
   }
 
-  // Menù per i filtri di categoria e data
+  // Menu a tendina per i filtri
   Widget _buildFilterMenu() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        // Filtro per categoria
         DropdownButton<String>(
           value: selectedCategory,
           hint: Text("Category"),
@@ -225,12 +139,9 @@ class _ArticlesPageState extends State<ArticlesPage> {
             setState(() {
               selectedCategory = value;
             });
-            // Carica gli articoli dopo aver aggiornato la selezione
             _loadArticles();
           },
         ),
-        
-        // Filtro per data
         DropdownButton<String>(
           value: selectedDate,
           hint: Text("Date"),
@@ -248,6 +159,74 @@ class _ArticlesPageState extends State<ArticlesPage> {
           },
         ),
       ],
+    );
+  }
+
+  // Sezione degli articoli
+  Widget _buildArticleSection() {
+    if (isLoading) {
+      return Center(child: CircularProgressIndicator());
+    }
+
+    if (errorMessage != null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Text(
+            errorMessage!,
+            style: TextStyle(fontSize: 16.0, color: Colors.red),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+    }
+
+    if (articles!.isEmpty) {
+      return Center(
+        child: Text(
+          'No articles available.',
+          style: TextStyle(fontSize: 16.0),
+        ),
+      );
+    }
+
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(),
+      itemCount: articles!.length,
+      itemBuilder: (context, index) {
+        return _buildArticleCard(articles![index]);
+      },
+    );
+  }
+
+  // Card per visualizzare gli articoli
+  Widget _buildArticleCard(ArticleResponse article) {
+    return Card(
+      margin: EdgeInsets.symmetric(vertical: 8.0),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12.0),
+      ),
+      elevation: 4,
+      child: ListTile(
+        contentPadding: EdgeInsets.all(16),
+        title: Text(
+          article.title ?? 'No Title',
+          style: Theme.of(context).textTheme.subtitle1?.copyWith(fontWeight: FontWeight.bold),
+        ),
+        subtitle: Text(article.company ?? 'No Company'),
+        trailing: Icon(Icons.arrow_forward_ios),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ArticleDetailedPage(
+                article: article,
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 }
