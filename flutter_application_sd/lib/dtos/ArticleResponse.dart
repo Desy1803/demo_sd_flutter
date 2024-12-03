@@ -10,7 +10,6 @@ class ArticleResponse {
    String authorUsername;
    String authorEmail;
 
-  // Costruttore
   ArticleResponse({
     required this.id,
     required this.title,
@@ -24,10 +23,10 @@ class ArticleResponse {
     required this.authorEmail,
   });
 
-  // Factory per creare l'oggetto a partire da JSON
+
   factory ArticleResponse.fromJson(Map<String, dynamic> json) {
     return ArticleResponse(
-      id: json['id'] != null ? json['id'] as int : -1, // Valore predefinito per ID mancante
+      id: json['id'] != null ? json['id'] as int : -1, 
       title: json['title'] as String? ?? "Untitled",
       company: json['company'] as String? ?? "Unknown",
       description: json['description'] as String? ?? "No description available.",
@@ -40,7 +39,7 @@ class ArticleResponse {
     );
   }
 
-  // Metodo che converte un oggetto ArticleResponse in una mappa JSON
+
   Map<String, dynamic> toJson() {
     return {
       'id': id,

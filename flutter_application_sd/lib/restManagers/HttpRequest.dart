@@ -8,6 +8,7 @@ import 'package:flutter_application_sd/dtos/ArticleUpdate.dart';
 import 'package:flutter_application_sd/dtos/AuthenticationData.dart';
 import 'package:flutter_application_sd/dtos/Company.dart';
 import 'package:flutter_application_sd/dtos/CompanyDetails.dart';
+import 'package:flutter_application_sd/dtos/LatestInfoDto.dart';
 import 'package:flutter_application_sd/dtos/Market.dart';
 import 'package:flutter_application_sd/dtos/SearchArticleCriteria.dart';
 import 'package:flutter_application_sd/dtos/User.dart';
@@ -238,6 +239,26 @@ Future<bool?> sendPasswordReset(String email) async{
 
       CompanyDetails res = CompanyDetails.fromJson(json.decode(rawResult));
       print("Getting companies details");
+      return res;
+    } catch (e) {
+      print('Errore durante il recupero dei dettagli dell\'azienda: $e');
+      return null;
+    }
+  }
+
+  Future<LatestInfoDto?> getLatestInfo(String symbol) async {
+    try {
+      String rawResult = await _restManager.makeGetRequest(
+        Constants.ADDRESS_STORE_SERVER,
+        Constants.GET_REQUEST_GETLATESTINFO,
+        false,
+        {
+          'symbol': symbol,      
+        },
+      );
+
+      LatestInfoDto res = LatestInfoDto.fromJson(json.decode(rawResult));
+      print("Getting latest info company ${res}" );
       return res;
     } catch (e) {
       print('Errore durante il recupero dei dettagli dell\'azienda: $e');

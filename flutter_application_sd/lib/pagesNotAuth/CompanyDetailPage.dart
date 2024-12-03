@@ -47,7 +47,6 @@ class _CompanyDetailPageState extends State<CompanyDetailPage> {
                 ? Center(child: Text('Error during loading company details'))
                 : ListView(
                     children: [
-                      // Profile Card
                       Card(
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(15.0),

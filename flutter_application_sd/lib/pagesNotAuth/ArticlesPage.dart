@@ -21,7 +21,6 @@ class _ArticlesPageState extends State<ArticlesPage> {
   bool isLoading = true;
   String? errorMessage;
 
-  // Aggiungi le categorie e le date per i filtri
   final List<String> categories = ['All', 'Tech', 'Health', 'Business'];
   final List<String> dates = ['All', 'Last Week', 'Last Month', 'Last Year'];
 
@@ -44,12 +43,10 @@ class _ArticlesPageState extends State<ArticlesPage> {
       date: selectedDate,
     );
 
-    // Carica gli articoli
     List<ArticleResponse>? loadedArticles = await Model.sharedInstance.getPublicArticles(
       criteria: searchCriteria,
     );
 
-    // Gestisci il risultato
     setState(() {
       if (loadedArticles != null && loadedArticles.isNotEmpty) {
         // Ordina gli articoli per titolo

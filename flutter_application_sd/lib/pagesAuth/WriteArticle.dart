@@ -2,8 +2,9 @@ import 'dart:convert';
 import 'dart:html' as html;
 import 'package:flutter/material.dart';
 import 'package:flutter_application_sd/dtos/Article.dart';
-import 'package:flutter_application_sd/forms/ArticleForm.dart';
 import 'package:flutter_application_sd/restManagers/HttpRequest.dart';
+import 'package:flutter_application_sd/widgets/CategorySearchWidget.dart';
+import 'package:flutter_application_sd/widgets/CompanySelector.dart';
 import 'package:flutter_application_sd/widgets/CustomAppBar.dart';
 
 class WriteArticlePage extends StatefulWidget {
@@ -13,11 +14,11 @@ class WriteArticlePage extends StatefulWidget {
 
 class _WriteArticlePageState extends State<WriteArticlePage> {
   TextEditingController titleController = TextEditingController();
-  TextEditingController companyController = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
   TextEditingController fiscalYearController = TextEditingController();
-  TextEditingController categoryController = TextEditingController();
 
+  String? selectedCompany;
+  String? selectedCategory;
   String? imagePreviewUrl;
   String imageUrl = '';
   bool isPublic = true;
@@ -25,10 +26,10 @@ class _WriteArticlePageState extends State<WriteArticlePage> {
 
   Future<void> saveArticle() async {
     if (titleController.text.isEmpty ||
-        companyController.text.isEmpty ||
+        selectedCompany == null ||
         descriptionController.text.isEmpty ||
         fiscalYearController.text.isEmpty ||
-        categoryController.text.isEmpty) {
+        selectedCategory == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Please fill in all required fields.')),
       );
@@ -39,13 +40,13 @@ class _WriteArticlePageState extends State<WriteArticlePage> {
       id: 1,
       title: titleController.text,
       description: descriptionController.text,
-      company: companyController.text,
+      company: selectedCompany!,
       author: "author",
       timeUnit: fiscalYearController.text,
       isPublic: isPublic,
       isAI: isAIEnabled,
       imageUrl: imageUrl,
-      category: categoryController.text,
+      category: selectedCategory!,
     );
 
     try {
@@ -91,15 +92,14 @@ class _WriteArticlePageState extends State<WriteArticlePage> {
   }
 
   Future<void> fetchAIData(String aiType) async {
-    // Mock API call to fetch AI-generated data
     try {
       final response = await Model.sharedInstance.fetchAIArticle(aiType);
       setState(() {
         titleController.text = response.title;
         descriptionController.text = response.description;
-        companyController.text = response.company;
+        selectedCompany = response.company;
         fiscalYearController.text = response.timeUnit;
-        categoryController.text = response.category;
+        selectedCategory = response.category;
         isAIEnabled = true;
       });
       ScaffoldMessenger.of(context).showSnackBar(
@@ -122,21 +122,40 @@ class _WriteArticlePageState extends State<WriteArticlePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              ArticleForm(
-                titleController: titleController,
-                companyController: companyController,
-                descriptionController: descriptionController,
-                fiscalYearController: fiscalYearController,
-                categoryController: categoryController,
-                imagePreviewUrl: imagePreviewUrl,
-                onImageSelected: (dataUrl) {
+              TextField(
+                controller: titleController,
+                decoration: InputDecoration(labelText: 'Title'),
+                readOnly: isAIEnabled,
+              ),
+              SizedBox(height: 16),
+              TextField(
+                controller: descriptionController,
+                decoration: InputDecoration(labelText: 'Description'),
+                maxLines: 4,
+                readOnly: isAIEnabled,
+              ),
+              SizedBox(height: 16),
+              CompanySelector(
+                selectedCompany: selectedCompany,
+                onCompanySelected: (value) {
                   setState(() {
-                    imagePreviewUrl = dataUrl;
-                    imageUrl = dataUrl.split(',').last;
+                    selectedCompany = value;
                   });
                 },
-                isReadonly: isAIEnabled,
               ),
+              SizedBox(height: 16),
+              TextField(
+                controller: fiscalYearController,
+                decoration: InputDecoration(labelText: 'Fiscal Year'),
+                readOnly: isAIEnabled,
+              ),
+              SizedBox(height: 16),
+              CategorySearchWidget(onSelectedCategory: (value) {
+                  setState(() {
+                    selectedCategory= value;
+                  });
+                },),
+              SizedBox(height: 16),
               Row(
                 children: [
                   Checkbox(
@@ -152,6 +171,7 @@ class _WriteArticlePageState extends State<WriteArticlePage> {
                   Text('Public Article'),
                 ],
               ),
+              SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -175,6 +195,32 @@ class _WriteArticlePageState extends State<WriteArticlePage> {
           ),
         ),
       ),
+    );
+  }
+}
+
+
+
+class CategorySelector extends StatelessWidget {
+  final String? selectedCategory;
+  final ValueChanged<String> onCategorySelected;
+
+  CategorySelector({this.selectedCategory, required this.onCategorySelected});
+
+  @override
+  Widget build(BuildContext context) {
+    return DropdownButtonFormField<String>(
+      value: selectedCategory,
+      items: ['Category X', 'Category Y', 'Category Z']
+          .map((category) => DropdownMenuItem(
+                value: category,
+                child: Text(category),
+              ))
+          .toList(),
+      decoration: InputDecoration(labelText: 'Select Category'),
+      onChanged: (value) {
+        if (value != null) onCategorySelected(value);
+      },
     );
   }
 }
