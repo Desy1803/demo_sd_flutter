@@ -14,6 +14,10 @@ class RestManager {
     _token = token; 
   }
 
+   String get token {
+    return _token!;
+  }
+
   Future<String> _makeRequest(
     String serverAddress,
     String servicePath,

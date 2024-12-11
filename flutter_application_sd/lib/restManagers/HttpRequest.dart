@@ -20,7 +20,10 @@ class Model {
 
   RestManager _restManager = RestManager();
 
-  late AuthenticationData _authenticationData;
+  late AuthenticationData? _authenticationData = null;
+
+
+
 
   Future<String?> logIn(String email, String password) async {
     Map<String, dynamic> params = {
@@ -40,24 +43,31 @@ class Model {
 
       _authenticationData = AuthenticationData.fromJson(jsonDecode(response));
 
-      if (_authenticationData.hasError()) {
-        return _authenticationData.accessToken ?? null;
+      if (_authenticationData!.hasError()) {
+        return _authenticationData!.accessToken ?? null;
       }
 
-      _restManager.token = _authenticationData.accessToken;
+      _restManager.token = _authenticationData!.accessToken;
 
       Timer.periodic(
-        Duration(seconds: (_authenticationData.expiresIn - 50)),
+        Duration(seconds: (_authenticationData!.expiresIn - 50)),
         (Timer t) {
-          _refreshToken(_authenticationData.refreshToken);
+          _refreshToken(_authenticationData!.refreshToken);
         },
       );
 
-      return _authenticationData.accessToken; 
+      return _authenticationData!.accessToken; 
     } catch (e) {
       print("Login error: $e");
       return "An error occurred during login: $e";
     }
+  }
+   bool isAuthenticated(){
+    
+      if (_authenticationData==null ||_authenticationData!.accessToken.isEmpty || _authenticationData!.accessToken==""){
+        return false;
+      }
+      return true;
   }
 
   Future<bool> _refreshToken(String refreshToken) async {
@@ -75,12 +85,12 @@ class Model {
 
       _authenticationData = AuthenticationData.fromJson(jsonDecode(response));
 
-      if (_authenticationData.hasError()) {
+      if (_authenticationData!.hasError()) {
         print("Error in refreshed token: ${_authenticationData}");
         return false;
       }
 
-      _restManager.token = _authenticationData.accessToken;
+      _restManager.token = _authenticationData!.accessToken;
 
       return true;
     } catch (e) {
@@ -447,15 +457,16 @@ Future<void> deleteArticle(int articleId) async {
   }
 }
 
-  fetchAIArticle(String aiType) {}
+  fetchAIArticle(String aiType) {
+
+  }
 
   Future<Uint8List?> fetchArticleImage(int articleId) async {
   try {
-    // Endpoint per ottenere l'immagine
     String endpoint = "${Constants.GETIMAGE_ARTICLE}";
    
     Map<String, dynamic> queryParams = {
-      'articleId': articleId.toString(),  // Passiamo l'ID come int direttamente
+      'articleId': articleId.toString(),  
     };
     String rawResult = await _restManager.makeGetRequest(
       Constants.ADDRESS_STORE_SERVER, 
@@ -464,11 +475,9 @@ Future<void> deleteArticle(int articleId) async {
       queryParams 
     );
     
-    print("Raw result from image: $rawResult");
-
+    
     final parsed = base64.decode(rawResult);
-    print("Parsed: $parsed");
-
+    
     return Uint8List.fromList(parsed);
 
   } catch (e) {
@@ -477,4 +486,5 @@ Future<void> deleteArticle(int articleId) async {
   }
 }
 
+  
 }

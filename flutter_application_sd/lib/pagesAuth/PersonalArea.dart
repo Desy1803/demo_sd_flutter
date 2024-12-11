@@ -4,6 +4,7 @@ import 'package:flutter_application_sd/dtos/SearchArticleCriteria.dart';
 import 'package:flutter_application_sd/pagesNotAuth/ArticleDetailedPage.dart';
 import 'package:flutter_application_sd/restManagers/HttpRequest.dart';
 import 'package:flutter_application_sd/widgets/CustomAppBar.dart';
+import 'package:flutter_application_sd/widgets/LoginRecommendationPopup.dart';
 import 'WriteArticle.dart';
 
 class PersonalArea extends StatefulWidget {
@@ -63,6 +64,9 @@ class _PersonalAreaState extends State<PersonalArea> {
 
   @override
   Widget build(BuildContext context) {
+    if (!Model.sharedInstance.isAuthenticated()) {
+      return const LoginRecommendationPopup();
+    }
     return Scaffold(
       appBar: CustomAppBar(showBackButton: true),
       body: Padding(

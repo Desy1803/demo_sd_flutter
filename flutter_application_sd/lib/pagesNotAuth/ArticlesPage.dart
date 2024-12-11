@@ -21,13 +21,13 @@ class _ArticlesPageState extends State<ArticlesPage> {
   bool isLoading = true;
   String? errorMessage;
 
-  final List<String> categories = ['All', 'Tech', 'Health', 'Business'];
+  final List<String> categories = [ 'All','Fundamental Data', 'Financial Data', 'Annual Reports', 'Profitability & Margins', 'Revenue & Growth', 'Analyst Ratings'];
   final List<String> dates = ['All', 'Last Week', 'Last Month', 'Last Year'];
 
   @override
   void initState() {
     super.initState();
-    _loadArticles();
+    _loadArticles(); 
   }
 
   Future<void> _loadArticles() async {
@@ -49,7 +49,7 @@ class _ArticlesPageState extends State<ArticlesPage> {
 
     setState(() {
       if (loadedArticles != null && loadedArticles.isNotEmpty) {
-        // Ordina gli articoli per titolo
+        
         articles = loadedArticles..sort((a, b) => a.title.compareTo(b.title));
       } else {
         errorMessage = 'No articles found.';
@@ -57,7 +57,7 @@ class _ArticlesPageState extends State<ArticlesPage> {
       isLoading = false;
     });
   } catch (e) {
-    // Gestisci eventuali errori
+    
     setState(() {
       errorMessage = 'Error loading articles: ${e.toString()}';
       isLoading = false;
@@ -99,7 +99,7 @@ class _ArticlesPageState extends State<ArticlesPage> {
     );
   }
 
-  // Costruzione della barra di ricerca
+
   Widget _buildSearchBar() {
     return TextField(
       onChanged: (query) {
@@ -179,7 +179,7 @@ class _ArticlesPageState extends State<ArticlesPage> {
     }
 
     if (articles!.isEmpty) {
-      return Center(
+      return const Center(
         child: Text(
           'No articles available.',
           style: TextStyle(fontSize: 16.0),
@@ -197,7 +197,7 @@ class _ArticlesPageState extends State<ArticlesPage> {
     );
   }
 
-  // Card per visualizzare gli articoli
+
   Widget _buildArticleCard(ArticleResponse article) {
     return Card(
       margin: EdgeInsets.symmetric(vertical: 8.0),

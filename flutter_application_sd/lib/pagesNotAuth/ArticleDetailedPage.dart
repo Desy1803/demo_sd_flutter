@@ -212,6 +212,7 @@ class _ArticleDetailedPageState extends State<ArticleDetailedPage> {
                     'Author email: ${widget.article.authorEmail }',
                     style: const TextStyle(fontSize: 16.0, fontStyle: FontStyle.italic),
                   ),
+                  const SizedBox(height: 8.0),
                   Row(
                     children: [
                       _buildInfoChip(
@@ -253,7 +254,7 @@ class _ArticleDetailedPageState extends State<ArticleDetailedPage> {
                         ),
                     ],
                   ),
-
+                  const SizedBox(height: 8.0),
                   if (isEditing)
                     Center(
                       child: ElevatedButton.icon(

@@ -1,11 +1,13 @@
 import 'dart:convert';
-import 'dart:html' as html;
+import 'dart:typed_data';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_sd/dtos/Article.dart';
 import 'package:flutter_application_sd/restManagers/HttpRequest.dart';
 import 'package:flutter_application_sd/widgets/CategorySearchWidget.dart';
 import 'package:flutter_application_sd/widgets/CompanySelector.dart';
 import 'package:flutter_application_sd/widgets/CustomAppBar.dart';
+import 'package:flutter_application_sd/widgets/DropZoneWidget.dart';
 
 class WriteArticlePage extends StatefulWidget {
   @override
@@ -20,7 +22,8 @@ class _WriteArticlePageState extends State<WriteArticlePage> {
   String? selectedCompany;
   String? selectedCategory;
   String? imagePreviewUrl;
-  String imageUrl = '';
+  String? imageName;
+  String? imageUrl; 
   bool isPublic = true;
   bool isAIEnabled = false;
 
@@ -45,7 +48,7 @@ class _WriteArticlePageState extends State<WriteArticlePage> {
       timeUnit: fiscalYearController.text,
       isPublic: isPublic,
       isAI: isAIEnabled,
-      imageUrl: imageUrl,
+      imageUrl: imageUrl ?? '', 
       category: selectedCategory!,
     );
 
@@ -152,7 +155,7 @@ class _WriteArticlePageState extends State<WriteArticlePage> {
               SizedBox(height: 16),
               CategorySearchWidget(onSelectedCategory: (value) {
                   setState(() {
-                    selectedCategory= value;
+                    selectedCategory = value;
                   });
                 },),
               SizedBox(height: 16),
@@ -172,6 +175,50 @@ class _WriteArticlePageState extends State<WriteArticlePage> {
                 ],
               ),
               SizedBox(height: 16),
+              DropZoneWidget(
+                onFilesSelected: (List<PlatformFile>? files) {
+                  if (files != null && files.isNotEmpty) {
+                    setState(() {
+                      if (files.first.bytes != null) {
+                          Uint8List? fileBytes = Uint8List.fromList(files.first.bytes!);
+                          imageUrl = base64Encode(fileBytes);
+                          imageName = files.first.name;
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('No bytes available in the selected file.')),
+                          );
+                        }
+                      imageName = files.first.name;
+                    });
+                  }
+                },
+              ),
+              const SizedBox(height: 25),
+              if (imageUrl != null)
+                Column(
+                  children: [
+                    Text(
+                      "File Uploaded: ${imageName ?? "Unknown"}",
+                      style: const TextStyle(fontSize: 16, color: Colors.green),
+                    ),
+                    const SizedBox(height: 10),
+                    if (imageUrl != null)
+                      Container(
+                        height: 200,
+                        width: 200,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.black, width: 1),
+                        ),
+                        child: Image.memory(
+                          base64StringToBytes(imageUrl!),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                  ],
+                )
+              else
+                const Text("No file selected", style: TextStyle(fontSize: 16)),
+              SizedBox(height: 15 ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -199,28 +246,11 @@ class _WriteArticlePageState extends State<WriteArticlePage> {
   }
 }
 
-
-
-class CategorySelector extends StatelessWidget {
-  final String? selectedCategory;
-  final ValueChanged<String> onCategorySelected;
-
-  CategorySelector({this.selectedCategory, required this.onCategorySelected});
-
-  @override
-  Widget build(BuildContext context) {
-    return DropdownButtonFormField<String>(
-      value: selectedCategory,
-      items: ['Category X', 'Category Y', 'Category Z']
-          .map((category) => DropdownMenuItem(
-                value: category,
-                child: Text(category),
-              ))
-          .toList(),
-      decoration: InputDecoration(labelText: 'Select Category'),
-      onChanged: (value) {
-        if (value != null) onCategorySelected(value);
-      },
-    );
+Uint8List base64StringToBytes(String base64String) {
+  try {
+    return base64.decode(base64String);
+  } catch (e) {
+    throw FormatException("Invalid base64 string: $base64String");
   }
 }
+

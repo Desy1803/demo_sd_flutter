@@ -123,7 +123,7 @@ class _LatestInformationPageState extends State<LatestInformationPage> {
               _buildFieldRow('EV to Revenue', latestInfo!.eVToRevenue, 'Enterprise Value to Revenue, a valuation metric for comparing a company\'s revenues.'),
               _buildFieldRow('EV to EBITDA', latestInfo!.eVToEBITDA, 'Enterprise Value to EBITDA, a valuation metric that considers debt.'),
             ]),
-          // Profitability & Margins Section
+            
           _buildSection('Profitability & Margins', [
             _buildFieldRow('Profit Margin', '${latestInfo!.profitMargin}%', 'The percentage of revenue that becomes profit.'),
             _buildFieldRow('Operating Margin (TTM)', latestInfo!.operatingMarginTTM, 'The company\'s operating income divided by its revenue over the trailing 12 months.'),
