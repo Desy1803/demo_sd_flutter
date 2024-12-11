@@ -43,6 +43,14 @@ dependencies:
   country_list_pick: '^1.0.1+6'
   image_picker: ^0.8.9
   drop_zone: ^1.0.2
+  file_picker: ^5.2.1
+  carousel_slider: ^5.0.0
+  intl: ^0.18.0 
+  #flutter_dropzone: ^3.0.7
+
+
+
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
