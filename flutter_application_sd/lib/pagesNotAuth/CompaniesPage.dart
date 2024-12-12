@@ -4,6 +4,7 @@ import 'package:flutter_application_sd/pagesNotAuth/CompanyBalanceSheet.dart';
 import 'package:flutter_application_sd/pagesNotAuth/CompanyDetailPage.dart';
 import 'package:flutter_application_sd/pagesNotAuth/CompanySearchResultsPage.dart';
 import 'package:flutter_application_sd/pagesNotAuth/GlobalMarketStatusPage.dart';
+import 'package:flutter_application_sd/pagesNotAuth/LatestInformation.dart';
 import 'package:flutter_application_sd/pagesNotAuth/securityFlows/LoginPage.dart'; 
 import 'package:flutter_application_sd/restManagers/HttpRequest.dart';
 import 'package:flutter_application_sd/widgets/CustomAppBar.dart';
@@ -99,7 +100,7 @@ class _CompaniesPageState extends State<CompaniesPage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => LoginPage(), // Naviga alla pagina di login
+                  builder: (context) => LoginPage(),
                 ),
               );
             },
@@ -182,7 +183,7 @@ class _CompaniesPageState extends State<CompaniesPage> {
                         const SizedBox(height: 16),
                         ListView.builder(
                           physics: NeverScrollableScrollPhysics(),
-                          shrinkWrap: true, 
+                          shrinkWrap: true,
                           itemCount: companies.length,
                           itemBuilder: (context, index) {
                             return Card(
@@ -197,12 +198,24 @@ class _CompaniesPageState extends State<CompaniesPage> {
                                   getCategoryIcon(companies[index].category),
                                   color: Colors.black,
                                 ),
-                                title: Text(
-                                  companies[index].name,
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black,
-                                  ),
+                                title: Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      companies[index].name,
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                    SizedBox(width: 4),
+                                    Text(
+                                      '(${companies[index].symbol})',
+                                      style: TextStyle(
+                                        color: Colors.grey[700],
+                                      ),
+                                    ),
+                                  ],
                                 ),
                                 subtitle: Text(
                                   companies[index].category,
@@ -211,26 +224,16 @@ class _CompaniesPageState extends State<CompaniesPage> {
                                 trailing: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Text(
-                                      companies[index].symbol,
-                                      style: TextStyle(fontWeight: FontWeight.bold),
+                                    _buildStyledButton(
+                                      'Latest Information',
+                                      Icons.info_outline,
+                                      () => _handleLatestInformation(companies[index]),
                                     ),
                                     SizedBox(width: 8),
-                                    GestureDetector(
-                                      onTap: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) => CompanyBalanceSheet(
-                                              symbol: companies[index].symbol,
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                      child: Icon(
-                                        Icons.show_chart,
-                                        color: Colors.black,
-                                      ),
+                                    _buildStyledButton(
+                                      'Annual Reports',
+                                      Icons.library_books,
+                                      () => _handleAnnualReports(companies[index]),
                                     ),
                                   ],
                                 ),
@@ -251,5 +254,41 @@ class _CompaniesPageState extends State<CompaniesPage> {
                   ),
       ),
     );
+  }
+
+  Widget _buildStyledButton(String label, IconData icon, VoidCallback onPressed) {
+    return ElevatedButton.icon(
+      onPressed: onPressed,
+      icon: Icon(icon, color: Colors.white),
+      label: Text(
+        label,
+        style: TextStyle(color: Colors.white),
+      ),
+      style: ElevatedButton.styleFrom(
+        primary: Color(0xFF001F3F), // Button color
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12), // Rounded corners
+        ),
+        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      ),
+    );
+  }
+
+  void _handleLatestInformation(Company company) {
+    Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => LatestInformationPage(symbol: company.symbol, companyName: company.name,), 
+                ),
+              );
+  }
+
+  void _handleAnnualReports(Company company) {
+       Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => CompanyBalanceSheet(symbol: company.symbol), 
+                ),
+              );
   }
 }

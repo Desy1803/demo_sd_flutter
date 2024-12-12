@@ -16,9 +16,7 @@ class _CreateArticleWithAIWidgetState extends State<CreateArticleWithAIWidget> {
   String? selectedCompany;
   String? selectedCategory;
   DateTime? selectedDate;
-  bool useGoogle = false;
-  String? imagePreviewUrl;
-  String imageUrl = '';
+  bool useGoogle = true;
 
   Future<void> createArticleWithAI() async {
     if (selectedCompany == null || selectedCategory == null || selectedDate == null) {
@@ -59,25 +57,6 @@ class _CreateArticleWithAIWidgetState extends State<CreateArticleWithAIWidget> {
     }
   }
 
-  void handleImageUpload() async {
-    html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
-    uploadInput.accept = 'image/*';
-    uploadInput.click();
-
-    uploadInput.onChange.listen((e) async {
-      final files = uploadInput.files;
-      if (files!.isEmpty) return;
-
-      final reader = html.FileReader();
-      reader.readAsDataUrl(files[0]);
-      reader.onLoadEnd.listen((e) {
-        setState(() {
-          imagePreviewUrl = reader.result as String;
-          imageUrl = imagePreviewUrl!.split(',').last;
-        });
-      });
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -125,35 +104,8 @@ class _CreateArticleWithAIWidgetState extends State<CreateArticleWithAIWidget> {
                 },
               ),
               const SizedBox(height: 16),
-              if (imagePreviewUrl != null)
-                Column(
-                  children: [
-                    const Text('Image Preview:'),
-                    const SizedBox(height: 8),
-                    Image.network(imagePreviewUrl!),
-                  ],
-                ),
-              ElevatedButton(
-                onPressed: handleImageUpload,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF001F3F),
-                ),
-                child: const Text('Upload Image', style: TextStyle(color: Colors.white)),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Checkbox(
-                    value: useGoogle,
-                    onChanged: (value) {
-                      setState(() {
-                        useGoogle = value!;
-                      });
-                    },
-                  ),
-                  const Text('Allow AI to use Google'),
-                ],
-              ),
+            
+              const Text('This AI uses Google information, so pay attention.'),
               const SizedBox(height: 24),
               Center(
                 child: ElevatedButton(
