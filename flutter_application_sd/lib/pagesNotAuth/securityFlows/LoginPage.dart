@@ -3,6 +3,7 @@ import 'package:flutter_application_sd/pagesAuth/PersonalArea.dart';
 import 'package:flutter_application_sd/pagesNotAuth/CompaniesPage.dart';
 import 'package:flutter_application_sd/restManagers/HttpRequest.dart';
 import 'package:flutter_application_sd/widgets/CustomAppBarAuthFlow%20.dart';
+
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
 
@@ -37,7 +38,7 @@ class _LoginState extends State<LoginPage> with SingleTickerProviderStateMixin {
     super.dispose();
   }
 
-   Duration get loginTime => Duration(milliseconds: 2250);
+  Duration get loginTime => Duration(milliseconds: 2250);
 
   Future<String?> _authUser(String email, String password) async {
     return Future.delayed(loginTime).then((_) {
@@ -94,7 +95,7 @@ class _LoginState extends State<LoginPage> with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBarAuthFlow (),
+      appBar: CustomAppBarAuthFlow(),
       body: AnimatedBuilder(
         animation: _fadeAnimation,
         builder: (context, child) {
@@ -136,7 +137,20 @@ class _LoginState extends State<LoginPage> with SingleTickerProviderStateMixin {
                         }
                         _formKey.currentState!.save();
 
+                        // Show loading dialog
+                        showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (context) => const Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                        );
+
                         String? result = await _authUser(_email!, _password!);
+
+                        // Hide loading dialog
+                        Navigator.pop(context);
+
                         if (result != null) {
                           Navigator.pushReplacement(
                             context,
@@ -173,7 +187,7 @@ class _LoginState extends State<LoginPage> with SingleTickerProviderStateMixin {
                       ),
                     ),
 
-                                        const SizedBox(height: 16),
+                    const SizedBox(height: 16),
                     TextButton(
                       onPressed: () {
                         Navigator.pushNamed(context, "/forgot-password");

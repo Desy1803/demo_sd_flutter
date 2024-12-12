@@ -53,7 +53,7 @@ class _ArticleDetailedPageState extends State<ArticleDetailedPage> {
         title: titleController.text,
         description: descriptionController.text,
         company: companyController.text,
-        author: widget.article.authorUsername, 
+        author: widget.article.authorUsername!, 
         isPublic: widget.article.isPublic, 
         isAI: widget.article.isAi, 
       );

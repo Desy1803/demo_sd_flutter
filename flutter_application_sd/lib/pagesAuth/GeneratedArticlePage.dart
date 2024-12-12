@@ -1,62 +1,77 @@
-import 'dart:convert';
-import 'dart:html' as html;
 import 'package:flutter/material.dart';
 import 'package:flutter_application_sd/dtos/Article.dart';
-import 'package:flutter_application_sd/pagesAuth/AiWidget.dart';
+import 'package:flutter_application_sd/dtos/ArticleResponse.dart';
 import 'package:flutter_application_sd/pagesAuth/PersonalArea.dart';
 import 'package:flutter_application_sd/restManagers/HttpRequest.dart';
-import 'package:flutter_application_sd/widgets/CompanySelector.dart';  
-import 'package:flutter_application_sd/widgets/CategorySelector.dart';
 import 'package:flutter_application_sd/widgets/CustomAppBar.dart';
-import 'package:flutter_application_sd/widgets/DateSelectort.dart'; 
+import 'dart:html' as html;
 
-class WriteArticlePage extends StatefulWidget {
+
+class GeneratedArticlePage extends StatefulWidget {
+  final ArticleResponse article;
+
+  const GeneratedArticlePage({Key? key, required this.article}) : super(key: key);
+
   @override
-  _WriteArticlePageState createState() => _WriteArticlePageState();
+  _GeneratedArticlePageState createState() => _GeneratedArticlePageState();
 }
 
-class _WriteArticlePageState extends State<WriteArticlePage> {
-  TextEditingController titleController = TextEditingController();
-  TextEditingController descriptionController = TextEditingController();
-  bool isPublic = true;
-  bool isAIEnabled = false;
+class _GeneratedArticlePageState extends State<GeneratedArticlePage> {
+  late TextEditingController titleController;
+  late TextEditingController companyController;
+  late TextEditingController descriptionController;
+  late TextEditingController fiscalYearController;
+  late TextEditingController categoryController;
 
-  // New variables for the selected company, category, and date
-  String? selectedCompany;
-  String? selectedCategory;
-  DateTime? selectedDate;
-  String imageUrl = '';
   String? imagePreviewUrl;
+  String imageUrl = '';
+  final bool isAIEnabled = true;
+  bool isPublic = true;
+
+  @override
+  void initState() {
+    super.initState();
+    titleController = TextEditingController(text: widget.article.title);
+    companyController = TextEditingController(text: widget.article.company);
+    descriptionController = TextEditingController(text: removeAsterisks(widget.article.description));
+    fiscalYearController = TextEditingController(text: widget.article.date);
+    categoryController = TextEditingController(text: widget.article.category);
+    isPublic = widget.article.isPublic;
+  }
+
+  String removeAsterisks(String text) {
+    return text.replaceAll('*', '').trim();
+  }
 
   Future<void> saveArticle() async {
     if (titleController.text.isEmpty ||
-        selectedCompany == null ||  // Check if company is selected
+        companyController.text.isEmpty ||
         descriptionController.text.isEmpty ||
-        selectedCategory == null || // Check if category is selected
-        selectedDate == null) {    // Check if date is selected
+        fiscalYearController.text.isEmpty ||
+        categoryController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please fill in all required fields.')),
+        const SnackBar(content: Text('Please fill in all required fields.')),
       );
       return;
     }
 
     Article article = Article(
-      id: 1,
+      id: widget.article.id,
       title: titleController.text,
       description: descriptionController.text,
-      company: selectedCompany!,  // Use selected company
-      author: "author",
-      timeUnit: selectedDate.toString(),  // Use selected date as the fiscal year
+      company: companyController.text,
+      author: "ciao",
+      timeUnit: fiscalYearController.text,
       isPublic: isPublic,
       isAI: isAIEnabled,
       imageUrl: imageUrl,
-      category: selectedCategory!,  // Use selected category
+      category: categoryController.text,
     );
 
     try {
-      Article? articleRet = await Model.sharedInstance.createArticle(article);
+      await Model.sharedInstance.createArticle(article);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Article saved successfully!')),
+        const SnackBar(content: Text('Article saved successfully!')),
       );
       Navigator.pushReplacement(
         context,
@@ -96,8 +111,7 @@ class _WriteArticlePageState extends State<WriteArticlePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(
-      ),
+      appBar: CustomAppBar(),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
@@ -105,29 +119,11 @@ class _WriteArticlePageState extends State<WriteArticlePage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                'Create Your Article',
+                'Generated Article',
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF001F3F),
-                ),
-              ),
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => CreateArticleWithAIWidget(),
-                    ),
-                  );
-                },
-                child: const Text(
-                  'Try creating your article with AI',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Color(0xFF001F3F),
-                    decoration: TextDecoration.underline,  
-                  ),
                 ),
               ),
               const SizedBox(height: 16),
@@ -139,40 +135,42 @@ class _WriteArticlePageState extends State<WriteArticlePage> {
                 ),
               ),
               const SizedBox(height: 16),
-              CompanySelector(
-                selectedCompany: selectedCompany,
-                onCompanySelected: (value) {
-                  setState(() {
-                    selectedCompany = value;
-                  });
-                },
-              ),
-              const SizedBox(height: 16),
               TextField(
-                controller: descriptionController,
-                maxLines: 4,
+                controller: companyController,
                 decoration: const InputDecoration(
-                  labelText: 'Description',
+                  labelText: 'Company',
                   border: OutlineInputBorder(),
                 ),
               ),
               const SizedBox(height: 16),
-              CategorySelector(
-                selectedCategory: selectedCategory,
-                onCategorySelected: (value) {
-                  setState(() {
-                    selectedCategory = value;
-                  });
-                },
+              const Text(
+                'Description',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: descriptionController,
+                maxLines: 10,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  hintText: 'Enter article description...',
+                ),
               ),
               const SizedBox(height: 16),
-              DateSelector(
-                selectedDate: selectedDate,
-                onDateSelected: (value) {
-                  setState(() {
-                    selectedDate = value;
-                  });
-                },
+              TextField(
+                controller: fiscalYearController,
+                decoration: const InputDecoration(
+                  labelText: 'Fiscal Year',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: categoryController,
+                decoration: const InputDecoration(
+                  labelText: 'Category',
+                  border: OutlineInputBorder(),
+                ),
               ),
               const SizedBox(height: 16),
               if (imagePreviewUrl != null)

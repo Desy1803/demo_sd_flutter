@@ -1,74 +1,60 @@
-import 'dart:convert';
-import 'dart:html' as html;
 import 'package:flutter/material.dart';
-import 'package:flutter_application_sd/dtos/Article.dart';
-import 'package:flutter_application_sd/pagesAuth/AiWidget.dart';
-import 'package:flutter_application_sd/pagesAuth/PersonalArea.dart';
+import 'package:flutter_application_sd/pagesAuth/GeneratedArticlePage.dart';
 import 'package:flutter_application_sd/restManagers/HttpRequest.dart';
-import 'package:flutter_application_sd/widgets/CompanySelector.dart';  
+import 'package:flutter_application_sd/widgets/CompanySelector.dart';
 import 'package:flutter_application_sd/widgets/CategorySelector.dart';
 import 'package:flutter_application_sd/widgets/CustomAppBar.dart';
-import 'package:flutter_application_sd/widgets/DateSelectort.dart'; 
+import 'package:flutter_application_sd/widgets/DateSelectort.dart';
+import 'dart:html' as html;
 
-class WriteArticlePage extends StatefulWidget {
+class CreateArticleWithAIWidget extends StatefulWidget {
   @override
-  _WriteArticlePageState createState() => _WriteArticlePageState();
+  _CreateArticleWithAIWidgetState createState() => _CreateArticleWithAIWidgetState();
 }
 
-class _WriteArticlePageState extends State<WriteArticlePage> {
-  TextEditingController titleController = TextEditingController();
-  TextEditingController descriptionController = TextEditingController();
-  bool isPublic = true;
-  bool isAIEnabled = false;
-
-  // New variables for the selected company, category, and date
+class _CreateArticleWithAIWidgetState extends State<CreateArticleWithAIWidget> {
   String? selectedCompany;
   String? selectedCategory;
   DateTime? selectedDate;
-  String imageUrl = '';
+  bool useGoogle = false;
   String? imagePreviewUrl;
+  String imageUrl = '';
 
-  Future<void> saveArticle() async {
-    if (titleController.text.isEmpty ||
-        selectedCompany == null ||  // Check if company is selected
-        descriptionController.text.isEmpty ||
-        selectedCategory == null || // Check if category is selected
-        selectedDate == null) {    // Check if date is selected
+  Future<void> createArticleWithAI() async {
+    if (selectedCompany == null || selectedCategory == null || selectedDate == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please fill in all required fields.')),
+        SnackBar(content: Text('Please select all required fields.')),
       );
       return;
     }
 
-    Article article = Article(
-      id: 1,
-      title: titleController.text,
-      description: descriptionController.text,
-      company: selectedCompany!,  // Use selected company
-      author: "author",
-      timeUnit: selectedDate.toString(),  // Use selected date as the fiscal year
-      isPublic: isPublic,
-      isAI: isAIEnabled,
-      imageUrl: imageUrl,
-      category: selectedCategory!,  // Use selected category
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(),
+      ),
     );
 
     try {
-      Article? articleRet = await Model.sharedInstance.createArticle(article);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Article saved successfully!')),
+      final response = await Model.sharedInstance.fetchAIArticle(
+        company: selectedCompany!,
+        category: selectedCategory!,
+        date: selectedDate!,
+        useGoogle: useGoogle.toString(),
       );
-      Navigator.pushReplacement(
+
+      Navigator.pop(context); 
+      Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => PersonalArea()),
+        MaterialPageRoute(
+          builder: (context) => GeneratedArticlePage(article: response),
+        ),
       );
     } catch (e) {
+      Navigator.pop(context); 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to save article: $e')),
-      );
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => PersonalArea()),
+        SnackBar(content: Text('Failed to create article: $e')),
       );
     }
   }
@@ -96,8 +82,7 @@ class _WriteArticlePageState extends State<WriteArticlePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(
-      ),
+      appBar: CustomAppBar(),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
@@ -105,37 +90,11 @@ class _WriteArticlePageState extends State<WriteArticlePage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                'Create Your Article',
+                'Write Your Article With AI',
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF001F3F),
-                ),
-              ),
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => CreateArticleWithAIWidget(),
-                    ),
-                  );
-                },
-                child: const Text(
-                  'Try creating your article with AI',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Color(0xFF001F3F),
-                    decoration: TextDecoration.underline,  
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: titleController,
-                decoration: const InputDecoration(
-                  labelText: 'Title',
-                  border: OutlineInputBorder(),
                 ),
               ),
               const SizedBox(height: 16),
@@ -146,15 +105,6 @@ class _WriteArticlePageState extends State<WriteArticlePage> {
                     selectedCompany = value;
                   });
                 },
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: descriptionController,
-                maxLines: 4,
-                decoration: const InputDecoration(
-                  labelText: 'Description',
-                  border: OutlineInputBorder(),
-                ),
               ),
               const SizedBox(height: 16),
               CategorySelector(
@@ -194,20 +144,20 @@ class _WriteArticlePageState extends State<WriteArticlePage> {
               Row(
                 children: [
                   Checkbox(
-                    value: isPublic,
+                    value: useGoogle,
                     onChanged: (value) {
                       setState(() {
-                        isPublic = value!;
+                        useGoogle = value!;
                       });
                     },
                   ),
-                  const Text('Public Article'),
+                  const Text('Allow AI to use Google'),
                 ],
               ),
               const SizedBox(height: 24),
               Center(
                 child: ElevatedButton(
-                  onPressed: saveArticle,
+                  onPressed: createArticleWithAI,
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(
                       vertical: 16.0,
@@ -219,7 +169,7 @@ class _WriteArticlePageState extends State<WriteArticlePage> {
                     ),
                   ),
                   child: const Text(
-                    "Save Article",
+                    "Create Article",
                     style: TextStyle(fontSize: 18, color: Colors.white),
                   ),
                 ),

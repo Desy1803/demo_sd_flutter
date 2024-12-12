@@ -7,8 +7,8 @@ class ArticleResponse {
    bool isAi;
    String date;
    String category;
-   String authorUsername;
-   String authorEmail;
+   String? authorUsername;
+   String? authorEmail;
 
   ArticleResponse({
     required this.id,

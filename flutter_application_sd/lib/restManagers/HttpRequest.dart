@@ -457,8 +457,24 @@ Future<void> deleteArticle(int articleId) async {
   }
 }
 
-  fetchAIArticle(String aiType) {
+  Future<ArticleResponse> fetchAIArticle( {required String? company, required String? category, required DateTime? date, required String? useGoogle}) async {
+     dynamic params = {
+      "company": company!,
+      "category": category!,
+      "date": date.toString(),
+      "getSourcesFromGoogle": useGoogle
+     };
+    String endpoint = "${Constants.POSTREQUEST_CREATEARTICLEWITHAI}";
 
+    String rawResult = await _restManager.makePostRequest(
+      Constants.ADDRESS_STORE_SERVER, 
+      endpoint, 
+      params,
+      true
+    );
+
+    final parsed = json.decode(rawResult) as Map<String, dynamic>;
+    return ArticleResponse.fromJson(parsed);
   }
 
   Future<Uint8List?> fetchArticleImage(int articleId) async {

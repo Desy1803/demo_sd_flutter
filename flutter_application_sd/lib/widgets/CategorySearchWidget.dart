@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 
 // Define the Category model
@@ -39,7 +38,6 @@ class _CategorySearchWidgetState extends State<CategorySearchWidget> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () async {
-        // Show the dropdown menu when clicked
         final String? selectedCategory = await showDialog<String>(
           context: context,
           builder: (BuildContext context) {
@@ -57,7 +55,6 @@ class _CategorySearchWidgetState extends State<CategorySearchWidget> {
           },
         );
 
-        // Handle the selected category
         if (selectedCategory != null) {
           setState(() {
             _selectedCategoryName = selectedCategory;
