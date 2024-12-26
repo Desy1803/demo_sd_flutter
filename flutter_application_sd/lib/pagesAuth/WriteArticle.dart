@@ -1,16 +1,24 @@
-import 'dart:convert';
 import 'dart:html' as html;
 import 'package:flutter/material.dart';
 import 'package:flutter_application_sd/dtos/Article.dart';
 import 'package:flutter_application_sd/pagesAuth/AiWidget.dart';
 import 'package:flutter_application_sd/pagesAuth/PersonalArea.dart';
 import 'package:flutter_application_sd/restManagers/HttpRequest.dart';
-import 'package:flutter_application_sd/widgets/CompanySelector.dart';  
+import 'package:flutter_application_sd/widgets/CompanySelector.dart';
 import 'package:flutter_application_sd/widgets/CategorySelector.dart';
 import 'package:flutter_application_sd/widgets/CustomAppBar.dart';
-import 'package:flutter_application_sd/widgets/DateSelectort.dart'; 
+import 'package:flutter_application_sd/widgets/DateSelectort.dart';
+import 'package:flutter_application_sd/widgets/LoginRecommendationPopup.dart';
 
 class WriteArticlePage extends StatefulWidget {
+  String? selectedCompany;
+  String? symbol;
+  String? category;
+  DateTime? selectedDate;
+  dynamic articleData;
+
+  WriteArticlePage({this.symbol, this.selectedCompany, this.category, this.selectedDate, this.articleData});
+
   @override
   _WriteArticlePageState createState() => _WriteArticlePageState();
 }
@@ -20,20 +28,30 @@ class _WriteArticlePageState extends State<WriteArticlePage> {
   TextEditingController descriptionController = TextEditingController();
   bool isPublic = true;
   bool isAIEnabled = false;
-
-  // New variables for the selected company, category, and date
+  String? symbol;
   String? selectedCompany;
   String? selectedCategory;
   DateTime? selectedDate;
   String imageUrl = '';
   String? imagePreviewUrl;
+  dynamic articleData;
+
+  @override
+  void initState() {
+    super.initState();
+    selectedCompany = widget.selectedCompany;
+    selectedCategory = widget.category;
+    selectedDate = widget.selectedDate;
+    articleData = widget.articleData;
+    symbol = widget.symbol;
+  }
 
   Future<void> saveArticle() async {
     if (titleController.text.isEmpty ||
-        selectedCompany == null ||  // Check if company is selected
+        selectedCompany == null ||
         descriptionController.text.isEmpty ||
-        selectedCategory == null || // Check if category is selected
-        selectedDate == null) {    // Check if date is selected
+        selectedCategory == null ||
+        selectedDate == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Please fill in all required fields.')),
       );
@@ -44,13 +62,13 @@ class _WriteArticlePageState extends State<WriteArticlePage> {
       id: 1,
       title: titleController.text,
       description: descriptionController.text,
-      company: selectedCompany!,  // Use selected company
+      company: selectedCompany!,
       author: "author",
-      timeUnit: selectedDate.toString(),  // Use selected date as the fiscal year
+      timeUnit: selectedDate!.toString(),
       isPublic: isPublic,
       isAI: isAIEnabled,
       imageUrl: imageUrl,
-      category: selectedCategory!,  // Use selected category
+      category: selectedCategory!,
     );
 
     try {
@@ -74,30 +92,35 @@ class _WriteArticlePageState extends State<WriteArticlePage> {
   }
 
   void handleImageUpload() async {
-    html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
-    uploadInput.accept = 'image/*';
-    uploadInput.click();
+  html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
+  uploadInput.accept = 'image/*';
+  uploadInput.click();
 
-    uploadInput.onChange.listen((e) async {
-      final files = uploadInput.files;
-      if (files!.isEmpty) return;
+  uploadInput.onChange.listen((e) async {
+    final files = uploadInput.files;
+    if (files!.isEmpty) return;
 
-      final reader = html.FileReader();
-      reader.readAsDataUrl(files[0]);
-      reader.onLoadEnd.listen((e) {
+    final reader = html.FileReader();
+    reader.readAsDataUrl(files[0]);
+    reader.onLoadEnd.listen((e) {
+      if (mounted) {  
         setState(() {
           imagePreviewUrl = reader.result as String;
           imageUrl = imagePreviewUrl!.split(',').last;
         });
-      });
+      }
     });
-  }
+  });
+}
+
 
   @override
   Widget build(BuildContext context) {
+    if (!Model.sharedInstance.isAuthenticated()) {
+      return const LoginRecommendationPopup();
+    }
     return Scaffold(
-      appBar: CustomAppBar(
-      ),
+      appBar: CustomAppBar(),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
@@ -117,7 +140,14 @@ class _WriteArticlePageState extends State<WriteArticlePage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => CreateArticleWithAIWidget(),
+                      builder: (context) => CreateArticleWithAIWidget(
+                        data: articleData,
+                        selectedCategory: selectedCategory,
+                        selectedCompany: selectedCompany,
+                        selectedDate: selectedDate,
+                        imagePreviewUrl: imagePreviewUrl,
+                        imageUrl: imageUrl,
+                      ),
                     ),
                   );
                 },
@@ -126,7 +156,7 @@ class _WriteArticlePageState extends State<WriteArticlePage> {
                   style: TextStyle(
                     fontSize: 16,
                     color: Color(0xFF001F3F),
-                    decoration: TextDecoration.underline,  
+                    decoration: TextDecoration.underline,
                   ),
                 ),
               ),

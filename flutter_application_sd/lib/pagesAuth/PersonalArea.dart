@@ -22,7 +22,7 @@ class _PersonalAreaState extends State<PersonalArea> {
   String? errorMessagePublic;
   String? errorMessagePrivate;
 
-  final List<String> categories = ['All', 'Tech', 'Health', 'Business'];
+  final List<String> categories = ['All', 'Fundamental Data', 'Financial Data', 'Annual Reports', 'Profitability & Margins', 'Revenue & Growth', 'Analyst Ratings'];
   final List<String> dates = ['All', 'Last Week', 'Last Month', 'Last Year'];
 
   @override

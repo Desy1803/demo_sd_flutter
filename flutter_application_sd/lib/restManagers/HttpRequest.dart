@@ -10,6 +10,8 @@ import 'package:flutter_application_sd/dtos/Company.dart';
 import 'package:flutter_application_sd/dtos/CompanyDetails.dart';
 import 'package:flutter_application_sd/dtos/LatestInfoDto.dart';
 import 'package:flutter_application_sd/dtos/Market.dart';
+import 'package:flutter_application_sd/dtos/PaginatedResponse.dart';
+import 'package:flutter_application_sd/dtos/Pagination.dart';
 import 'package:flutter_application_sd/dtos/SearchArticleCriteria.dart';
 import 'package:flutter_application_sd/dtos/User.dart';
 import 'package:flutter_application_sd/supports/Costants.dart';
@@ -26,42 +28,46 @@ class Model {
 
 
   Future<String?> logIn(String email, String password) async {
-    Map<String, dynamic> params = {
-      "username": email,
-      "password": password,
-    };
+  Map<String, dynamic> params = {
+    "username": email,
+    "password": password,
+  };
 
-    try {
-      String response = await _restManager.makePostRequest(
-        Constants.ADDRESS_STORE_SERVER,
-        Constants.POSTREQUEST_LOGIN,
-        params,
-        false,
-        type: TypeHeader.json,
-      );
+  try {
+    
+    String response = await _restManager.makePostRequest(
+      Constants.ADDRESS_STORE_SERVER,
+      Constants.POSTREQUEST_LOGIN,
+      params,
+      false,
+      type: TypeHeader.json,
+    );
 
 
-      _authenticationData = AuthenticationData.fromJson(jsonDecode(response));
+    _authenticationData = AuthenticationData.fromJson(jsonDecode(response));
 
-      if (_authenticationData!.hasError()) {
-        return _authenticationData!.accessToken ?? null;
-      }
 
-      _restManager.token = _authenticationData!.accessToken;
-
-      Timer.periodic(
-        Duration(seconds: (_authenticationData!.expiresIn - 50)),
-        (Timer t) {
-          _refreshToken(_authenticationData!.refreshToken);
-        },
-      );
-
-      return _authenticationData!.accessToken; 
-    } catch (e) {
-      print("Login error: $e");
-      return "An error occurred during login: $e";
+    if (_authenticationData!.hasError()) {
+      return _authenticationData!.accessToken ?? null;
     }
+
+
+    _restManager.token = _authenticationData!.accessToken;
+
+    Timer.periodic(
+      Duration(seconds: (_authenticationData!.expiresIn - 50)),
+      (Timer t) {
+        _refreshToken(_authenticationData!.refreshToken);
+      },
+    );
+
+    return _authenticationData!.accessToken;  
+  } catch (e) {
+    print("Login error: $e");
+    return null; 
   }
+}
+
    bool isAuthenticated(){
     
       if (_authenticationData==null ||_authenticationData!.accessToken.isEmpty || _authenticationData!.accessToken==""){
@@ -195,46 +201,58 @@ Future<bool?> sendPasswordReset(String email) async{
   }
 
 //Companies
+Future<List<Company>?> viewCompanies({required dynamic page, required dynamic size}) async {
+  try {
+    final Pagination pag = Pagination(size: size, page: page);
+    final Map<String, dynamic> filters = pag.toJson();
 
-  
-  Future<List<Company>?>  viewCompanies() async {
-    try {
-      String rawResult = await _restManager.makeGetRequest(
-        Constants.ADDRESS_STORE_SERVER,
-        Constants.GETREQUEST_VIEWALLCOMPANIES,
-        false
-      );
-      List<Company> res = List<Company>.from(json
-          .decode(rawResult)
-          .map((i) => Company.fromJson(i))
-          .toList());
-      print("Getting companies");
-      return res;
-    } catch (e) {
-      return null;
-    }
+    final String rawResult = await _restManager.makeGetRequest(
+      Constants.ADDRESS_STORE_SERVER,
+      Constants.GETREQUEST_VIEWALLCOMPANIES,
+      false,
+      filters,
+    );
+
+    print("Raw Result: $rawResult");
+
+    final Map<String, dynamic> responseJson = json.decode(rawResult);
+
+    PaginatedResponse<Company> response = PaginatedResponse<Company>.fromJson(
+      responseJson,
+      (json) => Company.fromJson(json),
+    );
+
+    return response.data;
+
+  } catch (e) {
+    print("Error fetching companies: $e");
+    throw Exception("Failed to fetch companies.");
   }
+}
 
 
 
-  Future<List<Company>?> getCompaniesBySearch(String value) async {
-    try {
-      String rawResult = await _restManager.makeGetRequest(
-        Constants.ADDRESS_STORE_SERVER,
-        Constants.GETREQUEST_GETCOMPANIESBYSEARCH,
-        false,
-        {'query': value}, 
-      );
 
+Future<List<Company>?> getCompaniesBySearch(String value) async {
+  try {
+    String rawResult = await _restManager.makeGetRequest(
+      Constants.ADDRESS_STORE_SERVER,
+      Constants.GETREQUEST_GETCOMPANIESBYSEARCH,
+      false,
+      {'query': value}, 
+    );
       List<Company> res = List<Company>.from(
         json.decode(rawResult).map((i) => Company.fromJson(i)).toList(),
       );
-      print("Getting companies by search");
-      return res;
-    } catch (e) {
-      return null;
-    }
+    
+    print("Getting companies by search");
+    return res;
+  } catch (e) {
+    print("Error fetching companies by search: $e");
+    return null;
   }
+}
+
   Future<CompanyDetails?> getCompanyDetails(String symbol) async {
     try {
       String rawResult = await _restManager.makeGetRequest(
@@ -457,13 +475,17 @@ Future<void> deleteArticle(int articleId) async {
   }
 }
 
-  Future<ArticleResponse> fetchAIArticle( {required String? company, required String? category, required DateTime? date, required String? useGoogle}) async {
+  Future<ArticleResponse> fetchAIArticle( {required String? company, required String? category, required DateTime? date, required String? useGoogle, dynamic data}) async {
      dynamic params = {
       "company": company!,
       "category": category!,
       "date": date.toString(),
-      "getSourcesFromGoogle": useGoogle
-     };
+      "getSourcesFromGoogle": useGoogle,
+      "dataOfCompany": (data is List)
+          ? jsonEncode(data.map((item) => item.toJson()).toList())  
+          : jsonEncode(data.toJson()) 
+    };
+
     String endpoint = "${Constants.POSTREQUEST_CREATEARTICLEWITHAI}";
 
     String rawResult = await _restManager.makePostRequest(
@@ -472,7 +494,7 @@ Future<void> deleteArticle(int articleId) async {
       params,
       true
     );
-
+    print(rawResult);
     final parsed = json.decode(rawResult) as Map<String, dynamic>;
     return ArticleResponse.fromJson(parsed);
   }

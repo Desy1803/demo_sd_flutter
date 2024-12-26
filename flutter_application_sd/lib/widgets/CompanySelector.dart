@@ -6,8 +6,13 @@ import 'package:flutter_application_sd/restManagers/HttpRequest.dart';
 class CompanySelector extends StatefulWidget {
   final String? selectedCompany;
   final ValueChanged<String> onCompanySelected;
+  final bool isEditable;
 
-  CompanySelector({this.selectedCompany, required this.onCompanySelected});
+  const CompanySelector({
+    this.selectedCompany,
+    required this.onCompanySelected,
+    this.isEditable = true,
+  });
 
   @override
   _CompanySelectorState createState() => _CompanySelectorState();
@@ -24,6 +29,7 @@ class _CompanySelectorState extends State<CompanySelector> {
   @override
   void initState() {
     super.initState();
+    selectedCompany = widget.selectedCompany;
     fetchCompanies();
   }
 
@@ -33,13 +39,14 @@ class _CompanySelectorState extends State<CompanySelector> {
     });
 
     try {
-      List<Company>? companiesFromBackend = await Model.sharedInstance.viewCompanies();
+      List<Company>? companiesFromBackend = await Model.sharedInstance.viewCompanies(page: -1, size: -1);
 
       if (companiesFromBackend != null) {
         List<String> companyNames = companiesFromBackend
             .map((c) => c.name)
             .toList()
-          ..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase())); 
+          ..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+
         setState(() {
           allCompanies = companyNames;
           filteredCompanies = companyNames;
@@ -80,26 +87,27 @@ class _CompanySelectorState extends State<CompanySelector> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: TextField(
-                  controller: searchController,
-                  decoration: InputDecoration(
-                    hintText: 'Search company',
-                    prefixIcon: Icon(Icons.search),
+              if (widget.isEditable)
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: TextField(
+                    controller: searchController,
+                    decoration: const InputDecoration(
+                      hintText: 'Search company',
+                      prefixIcon: Icon(Icons.search),
+                    ),
+                    onChanged: _filterCompanies,
                   ),
-                  onChanged: _filterCompanies,
                 ),
-              ),
               isLoading
-                  ? Center(child: CircularProgressIndicator())
+                  ? const Center(child: CircularProgressIndicator())
                   : filteredCompanies.isEmpty
-                      ? Padding(
-                          padding: const EdgeInsets.all(8.0),
+                      ? const Padding(
+                          padding: EdgeInsets.all(8.0),
                           child: Text('No companies found'),
                         )
                       : ConstrainedBox(
-                          constraints: BoxConstraints(maxHeight: 200),
+                          constraints: const BoxConstraints(maxHeight: 200),
                           child: ListView.builder(
                             itemCount: filteredCompanies.length,
                             itemBuilder: (context, index) {
@@ -112,8 +120,8 @@ class _CompanySelectorState extends State<CompanySelector> {
                                   });
                                   _overlayEntry?.remove();
                                   _overlayEntry = null;
-                                  searchController.clear(); 
-                                  filteredCompanies=allCompanies;
+                                  searchController.clear();
+                                  filteredCompanies = allCompanies;
                                 },
                               );
                             },
@@ -137,19 +145,16 @@ class _CompanySelectorState extends State<CompanySelector> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
+        if (!widget.isEditable) return;
+
         if (_overlayEntry != null) {
-          
-          setState(() {
-            searchController.clear(); 
-            fetchCompanies();
-          });
           _hideDropdown();
         } else {
           _showDropdown(context);
         }
       },
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
         decoration: BoxDecoration(
           border: Border.all(color: Colors.grey),
           borderRadius: BorderRadius.circular(8),
@@ -159,10 +164,10 @@ class _CompanySelectorState extends State<CompanySelector> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              selectedCompany ?? 'Select Company',
-              style: TextStyle(color: Colors.grey[600]),
+              selectedCompany ?? 'Select Company*',
+              style: TextStyle(color: selectedCompany != null ? Colors.black : Colors.grey[600]),
             ),
-            Icon(Icons.arrow_drop_down),
+            if (widget.isEditable) const Icon(Icons.arrow_drop_down),
           ],
         ),
       ),

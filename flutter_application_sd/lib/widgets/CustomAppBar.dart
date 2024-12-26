@@ -13,7 +13,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.showBackButton = true,
     this.backgroundColor = const Color(0xFF001F3F),
     this.titleColor = Colors.white,
-    this.actions = const [], // Azioni personalizzate (opzionali)
+    this.actions = const []
   });
 
   @override

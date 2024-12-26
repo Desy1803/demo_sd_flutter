@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_sd/dtos/LatestInfoDto.dart';
+import 'package:flutter_application_sd/pagesAuth/WriteArticle.dart';
 import 'package:flutter_application_sd/restManagers/HttpRequest.dart';
 import 'package:flutter_application_sd/widgets/CustomAppBar.dart';
 
@@ -95,6 +96,7 @@ class _LatestInformationPageState extends State<LatestInformationPage> {
                 selectionColor: Colors.white,
               ),
             ),
+            /*
             _buildSection('Fundamental Data', [
               _buildFieldRow('Symbol', latestInfo!.symbol, 'Unique identifier for the company\'s stock.'),
               _buildFieldRow('Name', latestInfo!.name, 'The official name of the company.'),
@@ -107,7 +109,7 @@ class _LatestInformationPageState extends State<LatestInformationPage> {
               _buildFieldRow('Address', latestInfo!.address, 'The company\'s official address.'),
               _buildFieldRow('Official site', latestInfo!.officialSite, 'The URL of the company\'s official website.'),
               _buildFieldRow('Fiscal year end', latestInfo!.fiscalYearEnd, 'The month in which the company\'s fiscal year ends.'),
-            ]),
+            ]),*/
 
             // Financial Data Section
             _buildSection('Financial Data', [
@@ -157,36 +159,58 @@ class _LatestInformationPageState extends State<LatestInformationPage> {
     );
   }
    Widget _buildSection(String sectionTitle, List<Widget> fields) {
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
-      color: Colors.white, // Light background for the section
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              _getSectionIcon(sectionTitle), // Icon for the section
-              SizedBox(width: 8.0),
-              Text(
-                sectionTitle,
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF001F3F),
-                ),
+  return Container(
+    padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
+    color: Colors.white, // Light background for the section
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            _getSectionIcon(sectionTitle), 
+            SizedBox(width: 8.0),
+            Text(
+              sectionTitle,
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF001F3F),
               ),
-            ],
+            ),
+          ],
+        ),InkWell(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => WriteArticlePage(
+                 symbol: widget.symbol,
+                  category: "$sectionTitle",
+                  selectedDate: null,
+                  articleData: latestInfo,
+                  selectedCompany: widget.companyName,
+              )),
+            );
+          },
+          child:  Text(
+            "Create your article about $sectionTitle",
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.blue, 
+              decoration: TextDecoration.underline, 
+            ),
           ),
-          SizedBox(height: 16.0),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: fields,
-          ),
-        ],
-      ),
-    );
-  }
-
+        ),
+        SizedBox(height: 16.0),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: fields,
+        ),
+        
+      ],
+    ),
+  );
+}
   Widget _buildFieldRow(String title, String value, String info) {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),

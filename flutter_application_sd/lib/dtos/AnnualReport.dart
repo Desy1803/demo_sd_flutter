@@ -121,4 +121,56 @@ class AnnualReport {
       commonStockSharesOutstanding: json['commonStockSharesOutstanding'],
     );
   }
+
+  // The toJson() method
+  Map<String, dynamic> toJson() {
+    return {
+      'fiscalDateEnding': fiscalDateEnding,
+      'reportedCurrency': reportedCurrency,
+      'totalAssets': totalAssets,
+      'totalCurrentAssets': totalCurrentAssets,
+      'cashAndCashEquivalentsAtCarryingValue': cashAndCashEquivalentsAtCarryingValue,
+      'cashAndShortTermInvestments': cashAndShortTermInvestments,
+      'inventory': inventory,
+      'currentNetReceivables': currentNetReceivables,
+      'totalNonCurrentAssets': totalNonCurrentAssets,
+      'propertyPlantEquipment': propertyPlantEquipment,
+      'accumulatedDepreciationAmortizationPPE': accumulatedDepreciationAmortizationPPE,
+      'intangibleAssets': intangibleAssets,
+      'intangibleAssetsExcludingGoodwill': intangibleAssetsExcludingGoodwill,
+      'goodwill': goodwill,
+      'investments': investments,
+      'longTermInvestments': longTermInvestments,
+      'shortTermInvestments': shortTermInvestments,
+      'otherCurrentAssets': otherCurrentAssets,
+      'otherNonCurrentAssets': otherNonCurrentAssets,
+      'totalLiabilities': totalLiabilities,
+      'totalCurrentLiabilities': totalCurrentLiabilities,
+      'currentAccountsPayable': currentAccountsPayable,
+      'deferredRevenue': deferredRevenue,
+      'currentDebt': currentDebt,
+      'shortTermDebt': shortTermDebt,
+      'totalNonCurrentLiabilities': totalNonCurrentLiabilities,
+      'capitalLeaseObligations': capitalLeaseObligations,
+      'longTermDebt': longTermDebt,
+      'currentLongTermDebt': currentLongTermDebt,
+      'longTermDebtNoncurrent': longTermDebtNoncurrent,
+      'shortLongTermDebtTotal': shortLongTermDebtTotal,
+      'otherCurrentLiabilities': otherCurrentLiabilities,
+      'otherNonCurrentLiabilities': otherNonCurrentLiabilities,
+      'totalShareholderEquity': totalShareholderEquity,
+      'treasuryStock': treasuryStock,
+      'retainedEarnings': retainedEarnings,
+      'commonStock': commonStock,
+      'commonStockSharesOutstanding': commonStockSharesOutstanding,
+    };
+  }
+  static AnnualReport? getReportByYear(List<AnnualReport> reports, String year) {
+    for (var report in reports) {
+      if (report.fiscalDateEnding.startsWith(year)) {
+        return report;
+      }
+    }
+    return null; 
+  }
 }

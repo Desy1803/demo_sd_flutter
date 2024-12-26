@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_sd/dtos/Company.dart';
 import 'package:flutter_application_sd/dtos/CompanyDetails.dart';
+import 'package:flutter_application_sd/pagesAuth/WriteArticle.dart';
 import 'package:flutter_application_sd/restManagers/HttpRequest.dart';
 import 'package:flutter_application_sd/widgets/CustomAppBar.dart';
 
@@ -95,7 +96,7 @@ class _CompanyDetailPageState extends State<CompanyDetailPage> {
                       Divider(height: 30, thickness: 1),
 
                       Text(
-                        'Description',
+                        'Description:',
                         style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
                       ),
                       SizedBox(height: 8),
@@ -158,6 +159,36 @@ class _CompanyDetailPageState extends State<CompanyDetailPage> {
                         companyDetails!.officialSite,
                         style: TextStyle(fontSize: 16, color: Colors.blue, fontStyle: FontStyle.italic),
                       ),
+                      
+                     SizedBox(height: 30),
+                     ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => WriteArticlePage(
+                              symbol: widget.company.symbol,
+                              selectedCompany: widget.company.name,
+                              category: 'Fundamental Data',
+                              articleData: companyDetails!,
+                            ),
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 2.0), 
+                        backgroundColor: const Color(0xFF001F3F),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                      ),
+                      child: const Text(
+                        'Create your article',
+                        style: TextStyle(fontSize: 18),
+                      ),
+                    )
+
+
                     ],
                   ),
       ),

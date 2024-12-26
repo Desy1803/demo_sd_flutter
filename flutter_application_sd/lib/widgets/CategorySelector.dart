@@ -17,6 +17,7 @@ class CategorySelector extends StatelessWidget {
     Category(name: 'Profitability & Margins', description: 'Metrics on a company\'s ability to generate profit from revenue.'),
     Category(name: 'Revenue & Growth', description: 'Indicators of a company\'s revenue growth and market expansion.'),
     Category(name: 'Analyst Ratings', description: 'Stock evaluations and recommendations from financial analysts.'),
+    Category(name: 'Analysis Data', description: 'Data analysis focused on a specific year, providing insights into a company\'s performance and market trends during that period for a thorough evaluation of business dynamics.')
   ];
 
   @override

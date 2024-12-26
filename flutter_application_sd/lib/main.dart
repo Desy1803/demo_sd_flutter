@@ -1,23 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_sd/pagesAuth/PersonalArea.dart';
-import 'package:flutter_application_sd/pagesNotAuth/ArticlesPage.dart';
 import 'package:flutter_application_sd/pagesNotAuth/CompaniesPage.dart';
-import 'package:flutter_application_sd/pagesNotAuth/securityFlows/ForgotPasswordPage.dart';
+import 'package:flutter_application_sd/pagesNotAuth/compact/CompactCompaniesPage.dart';
+import 'package:flutter_application_sd/pagesNotAuth/securityFlows/ForgotPasswordPage.dart'; 
 import 'package:flutter_application_sd/pagesNotAuth/securityFlows/LoginPage.dart';
+import 'package:flutter_application_sd/pagesNotAuth/ArticlesPage.dart';
 import 'package:flutter_application_sd/pagesNotAuth/securityFlows/RegisterPage.dart';
-
 void main() {
   runApp(const MyApp());
 }
 
+
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
- 
+
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    
     return MaterialApp(
       title: "Trading Reports",
-      home: CompaniesPage(),
+      home: screenWidth < 450 ? CompactCompaniesPage() : CompaniesPage(),
       debugShowCheckedModeBanner: false,
       routes: {
         '/login': (context) => const LoginPage(),
@@ -26,8 +29,6 @@ class MyApp extends StatelessWidget {
         '/registration': (context) => const RegisterPage(),
         '/forgot-password':(context)=> ForgotPasswordPage()
       },
-
     );
   }
-
 }

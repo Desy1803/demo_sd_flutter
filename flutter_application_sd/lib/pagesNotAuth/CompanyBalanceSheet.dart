@@ -1,16 +1,17 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_sd/dtos/AnnualReport.dart';
-import 'package:flutter_application_sd/pagesAuth/WriterArticlePage.dart';
+import 'package:flutter_application_sd/pagesAuth/WriteArticle.dart';
 import 'package:flutter_application_sd/restManagers/HttpRequest.dart';
 import 'package:flutter_application_sd/widgets/CustomAppBar.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 
 class CompanyBalanceSheet extends StatefulWidget {
-  final String symbol;  // Assuming `symbol` is passed to the widget
+  final String symbol; 
+  final String companyName;
 
-  CompanyBalanceSheet({required this.symbol});
+  CompanyBalanceSheet({required this.symbol, required this.companyName});
 
   @override
   _CompanyBalanceSheetState createState() => _CompanyBalanceSheetState();
@@ -19,7 +20,6 @@ class CompanyBalanceSheet extends StatefulWidget {
 class _CompanyBalanceSheetState extends State<CompanyBalanceSheet> {
   List<AnnualReport> annualReports = [];
   bool isLoading = true;
-
   @override
   void initState() {
     super.initState();
@@ -162,10 +162,12 @@ Widget _buildYearlyDataCard(AnnualReport report) {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => WriterArticlePage(
+                  builder: (context) => WriteArticlePage(
                     symbol: widget.symbol,
                     category: "Analysis Data",
-                    year: report.fiscalDateEnding, 
+                    articleData: annualReports,
+                    selectedCompany: widget.companyName,
+                    selectedDate: DateTime.parse(report.fiscalDateEnding),
                   ),
                 ),
               );
@@ -259,10 +261,10 @@ Widget _buildYearlyDataCard(AnnualReport report) {
                           title: Text("Price and Volume Chart"),
                           content: Text(
                             "This chart shows the relationship between:\n\n"
-                            "- **Price**: Calculated as Total Assets divided by "
+                            "- Price: Calculated as Total Assets divided by "
                             "Common Stock Shares Outstanding, representing the asset-backed "
                             "value per share.\n"
-                            "- **Volume**: Indicates the company's cash and short-term "
+                            "- Volume: Indicates the company's cash and short-term "
                             "investments, reflecting liquidity.\n\n"
                             "Together, these metrics provide insights into the company's "
                             "value and financial health over time.",
@@ -305,28 +307,7 @@ Widget _buildYearlyDataCard(AnnualReport report) {
           ],
         ),
       ),
-      Positioned(
-        bottom: 16,
-        right: 16,
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Color(0xFF001F3F),
-          ),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => WriterArticlePage(
-                  symbol: widget.symbol,
-                  category: "Analysis Data",
-                  year: "All past years",
-                ),
-              ),
-            );
-          },
-          child: Text("Create your Article"),
-        ),
-      ),
+      
     ],
   );
 }

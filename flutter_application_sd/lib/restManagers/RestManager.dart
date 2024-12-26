@@ -32,7 +32,6 @@ class RestManager {
     bool errorOccurred = false;
     int maxRetries = 3; 
     int attempts = 0;
-
     while (attempts < maxRetries) {
       try {
         var response;
@@ -44,6 +43,7 @@ class RestManager {
           formattedBody = body != null ? json.encode(body) : null;
         } else if (type == TypeHeader.urlencoded) {
           contentType = "application/x-www-form-urlencoded";
+          // ignore: prefer_null_aware_operators
           formattedBody = body != null ? body.keys.map((key) => "$key=${Uri.encodeComponent(body[key])}").join("&") : null;
         }        
        

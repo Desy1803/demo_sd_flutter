@@ -18,6 +18,8 @@ class _LoginState extends State<LoginPage> with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
 
+  int _failedLoginAttempts = 0; // Numero di tentativi di login non riusciti
+
   @override
   void initState() {
     super.initState();
@@ -38,57 +40,113 @@ class _LoginState extends State<LoginPage> with SingleTickerProviderStateMixin {
     super.dispose();
   }
 
-  Duration get loginTime => Duration(milliseconds: 2250);
+  Future<void> _handleLogin() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+    _formKey.currentState!.save();
 
-  Future<String?> _authUser(String email, String password) async {
-    return Future.delayed(loginTime).then((_) {
-      return Model.sharedInstance.logIn(email, password);
-    });
-  }
-
-  Widget _buildEmail() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: TextFormField(
-        keyboardType: TextInputType.emailAddress,
-        decoration: InputDecoration(
-          labelText: "Email",
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.0)),
-          prefixIcon: const Icon(Icons.email),
-        ),
-        validator: (String? value) {
-          if (value == null || value.isEmpty) {
-            return 'Mandatory email';
-          }
-          return null;
-        },
-        onSaved: (String? value) {
-          _email = value;
-        },
+    // Mostra il dialog di caricamento
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(),
       ),
     );
+
+    String? result = await Model.sharedInstance.logIn(_email!, _password!);
+
+    // Nasconde il dialog di caricamento
+    Navigator.pop(context);
+
+    if (result != null) {
+      setState(() {
+        _failedLoginAttempts = 0; // Resetta il conteggio se il login riesce
+      });
+      // Mostra il messaggio di benvenuto
+      showDialog(
+        context: context,
+        builder: (context) => _welcomeDialog(context),
+      );
+    } else {
+      setState(() {
+        _failedLoginAttempts++;
+      });
+
+      if (_failedLoginAttempts >= 5) {
+        Navigator.pushReplacementNamed(context, "/forgot-password");
+      } else {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text("Login Failed"),
+            content: Text(
+              "Invalid credentials. Please try again. ($_failedLoginAttempts/5 attempts used)",
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text("Retry"),
+              ),
+            ],
+          ),
+        );
+      }
+    }
   }
 
-  Widget _buildPassword() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: TextFormField(
-        obscureText: true,
-        decoration: InputDecoration(
-          labelText: "Password",
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.0)),
-          prefixIcon: const Icon(Icons.lock),
-        ),
-        validator: (String? value) {
-          if (value == null || value.isEmpty) {
-            return 'Request password';
-          }
-          return null;
-        },
-        onSaved: (String? value) {
-          _password = value;
-        },
+  Widget _welcomeDialog(BuildContext context) {
+    return AlertDialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
       ),
+      title: const Row(
+        children: [
+          Icon(Icons.check_circle_outline, color: Colors.green, size: 28),
+          SizedBox(width: 10),
+          Text(
+            "Welcome!",
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
+      content: const Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Divider(height: 20, thickness: 1),
+          Text(
+            "Welcome to Trading Reports! Now you can post your articles and get an overall view of companies. "
+            "Enjoy the intuitive tools and insights designed to enhance your reporting experience and make smarter decisions.",
+            style: TextStyle(fontSize: 16, height: 1.5),
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: 20),
+        ],
+      ),
+      actionsAlignment: MainAxisAlignment.center,
+      actions: [
+        ElevatedButton(
+          onPressed: () {
+            Navigator.pop(context); // Chiude il dialog
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => CompaniesPage()),
+            );
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF001F3F),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          ),
+          child: const Text(
+            "Get Started",
+            style: TextStyle(fontSize: 16, color: Colors.white),
+          ),
+        ),
+      ],
     );
   }
 
@@ -113,18 +171,13 @@ class _LoginState extends State<LoginPage> with SingleTickerProviderStateMixin {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        Text(
-                          "Login",
-                          style: TextStyle(
-                            fontSize: 36,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 1.5
-                          ),
-                        ),
-                      ],
+                    const Text(
+                      "Login",
+                      style: TextStyle(
+                        fontSize: 36,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1.5,
+                      ),
                     ),
                     const SizedBox(height: 24),
                     _buildEmail(),
@@ -132,44 +185,7 @@ class _LoginState extends State<LoginPage> with SingleTickerProviderStateMixin {
                     const SizedBox(height: 16),
                     ElevatedButton(
                       onPressed: () async {
-                        if (!_formKey.currentState!.validate()) {
-                          return;
-                        }
-                        _formKey.currentState!.save();
-
-                        // Show loading dialog
-                        showDialog(
-                          context: context,
-                          barrierDismissible: false,
-                          builder: (context) => const Center(
-                            child: CircularProgressIndicator(),
-                          ),
-                        );
-
-                        String? result = await _authUser(_email!, _password!);
-
-                        // Hide loading dialog
-                        Navigator.pop(context);
-
-                        if (result != null) {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(builder: (context) => CompaniesPage()),
-                          );
-                        } else {
-                          showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: const Text("Login Failed"),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context),
-                                  child: const Text("OK"),
-                                ),
-                              ],
-                            ),
-                          );
-                        }
+                        await _handleLogin();
                       },
                       style: ElevatedButton.styleFrom(
                         shape: RoundedRectangleBorder(
@@ -186,7 +202,6 @@ class _LoginState extends State<LoginPage> with SingleTickerProviderStateMixin {
                         style: TextStyle(fontSize: 18),
                       ),
                     ),
-
                     const SizedBox(height: 16),
                     TextButton(
                       onPressed: () {
@@ -222,4 +237,54 @@ class _LoginState extends State<LoginPage> with SingleTickerProviderStateMixin {
       ),
     );
   }
+
+
+  Widget _buildEmail() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: TextFormField(
+        keyboardType: TextInputType.emailAddress,
+        decoration: InputDecoration(
+          labelText: "Email",
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.0)),
+          prefixIcon: const Icon(Icons.email),
+        ),
+        validator: (String? value) {
+          if (value == null || value.isEmpty) {
+            return 'Mandatory email';
+          }
+          return null;
+        },
+        onSaved: (String? value) {
+          _email = value;
+        },
+      ),
+    );
+  }
+
+  Widget _buildPassword() {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 8.0),
+    child: TextFormField(
+      obscureText: true,
+      decoration: InputDecoration(
+        labelText: "Password",
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.0)),
+        prefixIcon: const Icon(Icons.lock),
+      ),
+      validator: (String? value) {
+        if (value == null || value.isEmpty) {
+          return 'Request password';
+        }
+        return null;
+      },
+      onSaved: (String? value) {
+        _password = value;
+      },
+      onFieldSubmitted: (_) async {
+        await _handleLogin(); // Invoca la funzione di login quando si preme invio
+      },
+    ),
+  );
+}
 }
