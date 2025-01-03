@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_application_sd/dtos/ArticleResponse.dart';
 import 'package:flutter_application_sd/dtos/SearchArticleCriteria.dart';
@@ -183,14 +185,126 @@ class _PersonalAreaState extends State<PersonalArea> {
             physics: NeverScrollableScrollPhysics(),
             itemCount: articles.length,
             itemBuilder: (context, index) {
-              return _buildArticleCard(articles[index], allowEditAndDelete);
+              return _buildArticleCard(articles[index]);
             },
           ),
       ],
     );
   }
 
-  Widget _buildArticleCard(ArticleResponse article, bool allowEditAndDelete) {
+   Widget _buildArticleCard(ArticleResponse article) {
+  return FutureBuilder<Uint8List?>(
+    future: Model.sharedInstance.fetchArticleImage(article.id),
+    builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return Card(
+          margin: EdgeInsets.symmetric(vertical: 8.0),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12.0),
+          ),
+          elevation: 4,
+          child: SizedBox(
+            height: 150,
+            child: Center(child: CircularProgressIndicator()),
+          ),
+        );
+      }
+
+      if (snapshot.hasError || snapshot.data == null || snapshot.data!.isEmpty) {
+        return _buildCardWithoutImage(article);
+      }
+
+      return GestureDetector(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ArticleDetailedPage(
+                article: article,
+                allowDelete: true,
+                allowEdit: true,
+              ),
+            ),
+          );
+        },
+        child: Card(
+          margin: EdgeInsets.symmetric(vertical: 8.0),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12.0),
+          ),
+          elevation: 4,
+          child: Column(
+            children: [
+              Image.memory(
+                snapshot.data!,
+                fit: BoxFit.cover,
+                height: 150,
+                width: double.infinity,
+              ),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      article.title ?? 'No Title',
+                      style: Theme.of(context)
+                          .textTheme
+                          .subtitle1
+                          ?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(height: 8.0),
+                    Row(
+                      children: [
+                        const Icon(Icons.business, color: Colors.blueGrey, size: 20),
+                        const SizedBox(width: 8.0),
+                        Text(
+                          'Company: ${article.company}',
+                          style: const TextStyle(
+                            fontSize: 12.0,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.blueGrey,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 4.0),
+                    Row(
+                      children: [
+                        const Icon(Icons.category, color: Colors.teal, size: 20),
+                        const SizedBox(width: 8.0),
+                        Text(
+                          'Category: ${article.category}',
+                          style: const TextStyle(
+                            fontSize: 12.0,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.teal,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 8.0),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: Icon(
+                        Icons.arrow_forward_ios,
+                        size: 16.0,
+                        color: Colors.blueGrey,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
+}
+
+
+  Widget _buildCardWithoutImage(ArticleResponse article) {
     return Card(
       margin: EdgeInsets.symmetric(vertical: 8.0),
       shape: RoundedRectangleBorder(
@@ -198,26 +312,63 @@ class _PersonalAreaState extends State<PersonalArea> {
       ),
       elevation: 4,
       child: ListTile(
-        contentPadding: EdgeInsets.all(16),
-        title: Text(
-          article.title ?? 'No Title',
-          style: Theme.of(context).textTheme.subtitle1?.copyWith(fontWeight: FontWeight.bold),
-        ),
-        subtitle: Text(article.company ?? 'No Company'),
-        trailing: Icon(Icons.arrow_forward_ios),
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ArticleDetailedPage(
-                article: article,
-                allowEdit: allowEditAndDelete,
-                allowDelete: allowEditAndDelete,
-              ),
-            ),
-          );
-        },
+      contentPadding: EdgeInsets.all(16),
+      title: Text(
+        article.title ?? 'No Title',
+        style: Theme.of(context)
+            .textTheme
+            .subtitle1
+            ?.copyWith(fontWeight: FontWeight.bold),
       ),
-    );
-  }
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.business, color: Colors.blueGrey, size: 20),
+              const SizedBox(width: 8.0),
+              Text(
+                'Company: ${article.company}',
+                style: const TextStyle(
+                  fontSize: 12.0,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.blueGrey,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 4.0),
+          Row(
+            children: [
+              const Icon(Icons.category, color: Colors.teal, size: 20),
+              const SizedBox(width: 8.0),
+              Text(
+                'Category: ${article.category}',
+                style: const TextStyle(
+                  fontSize: 12.0,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.teal,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+      trailing: Icon(Icons.arrow_forward_ios),
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ArticleDetailedPage(
+              article: article,
+              allowDelete: true,
+              allowEdit: true,
+            ),
+          ),
+        );
+      },
+    ),
+  );
+}
+
 }

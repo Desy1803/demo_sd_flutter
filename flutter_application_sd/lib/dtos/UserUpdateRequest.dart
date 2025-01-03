@@ -1,40 +1,32 @@
-class User {
+class UserUpdateRequest {
   String? username;
-  String? password;
   String? firstName;
   String? lastName;
-  String? email;
 
-  User({
+  UserUpdateRequest({
     this.username,
-    this.password,
     this.firstName,
     this.lastName,
-    this.email,
   });
 
   Map<String, dynamic> toJson() {
     return {
       'username': username,
-      'password': password,
       'firstName': firstName,
       'lastName': lastName,
-      'email': email,
     };
   }
 
-  factory User.fromJson(Map<String, dynamic> json) {
-    return User(
+  factory UserUpdateRequest.fromJson(Map<String, dynamic> json) {
+    return UserUpdateRequest(
       username: json['username'],
-      password: json['password'],
       firstName: json['firstName'],
       lastName: json['lastName'],
-      email: json['email'],
     );
   }
 
   @override
   String toString() {
-    return 'User(username: $username, password: $password, firstName: $firstName, lastName: $lastName, email: $email,)';
+    return 'User(username: $username, firstName: $firstName, lastName: $lastName)';
   }
 }

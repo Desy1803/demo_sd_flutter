@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_sd/dtos/AnnualReport.dart';
 import 'package:flutter_application_sd/pagesAuth/WriteArticle.dart';
@@ -132,7 +131,7 @@ Widget _buildYearlyDataCard(AnnualReport report) {
               children: [
                 Text(
                   "Year: ${report.fiscalDateEnding}",
-                  style: TextStyle(
+                  style: const TextStyle(
                       fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
                 ),
                 SizedBox(height: 16),
@@ -172,7 +171,7 @@ Widget _buildYearlyDataCard(AnnualReport report) {
                 ),
               );
             },
-            child: Text("Create your Article"),
+            child: const Text("Create your Article"),
           ),
         ),
       ],
@@ -203,8 +202,7 @@ Widget _buildYearlyDataCard(AnnualReport report) {
 
 
 
-
- Widget _buildPriceVolumeChart() {
+Widget _buildPriceVolumeChart() {
   if (annualReports.isEmpty) return Center(child: Text("No data available"));
 
   List<FlSpot> priceSpots = [];
@@ -213,16 +211,21 @@ Widget _buildYearlyDataCard(AnnualReport report) {
   double maxPrice = double.negativeInfinity;
   double maxVolume = double.negativeInfinity;
 
-  for (int i = 0; i < annualReports.length; i++) {
+  int totalYears = annualReports.length;
+
+  for (int i = 0; i < totalYears; i++) {
     final yearData = annualReports[i];
     double price = int.parse(yearData.totalAssets) /
         int.parse(yearData.commonStockSharesOutstanding);
     double volume = double.parse(yearData.cashAndShortTermInvestments);
 
-    priceSpots.add(FlSpot(i.toDouble(), price));
+    // Calcola l'indice invertito per l'asse X
+    double invertedIndex = (totalYears - 1 - i).toDouble();
+
+    priceSpots.add(FlSpot(invertedIndex, price));
 
     volumeBars.add(BarChartGroupData(
-      x: i,
+      x: invertedIndex.toInt(),
       barRods: [
         BarChartRodData(
           y: volume,
@@ -289,27 +292,27 @@ Widget _buildYearlyDataCard(AnnualReport report) {
                   barGroups: volumeBars,
                   titlesData: FlTitlesData(
                     bottomTitles: SideTitles(
-                      showTitles: true,
-                      getTitles: (value) => value.toInt() < annualReports.length
-                          ? "'" + annualReports[value.toInt()].fiscalDateEnding.substring(2, 4)
-                          : '',
+                      showTitles: true, 
+                      getTitles: (value) {
+                        String year = annualReports[value.toInt()].fiscalDateEnding.substring(0, 4);
+                        return year;
+                      },
                       margin: 8,
                     ),
                     leftTitles: SideTitles(showTitles: true),
                     rightTitles: SideTitles(showTitles: false),
+                    topTitles: SideTitles(showTitles: false)
                   ),
                   gridData: FlGridData(show: true),
                   borderData: FlBorderData(show: true),
-                  barTouchData: BarTouchData(enabled: false),
+                  barTouchData: BarTouchData(enabled: true),
                 ),
               ),
             ),
           ],
         ),
       ),
-      
     ],
   );
 }
-
 }

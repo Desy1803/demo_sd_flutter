@@ -85,11 +85,29 @@ class _GlobalMarketStatusState extends State<GlobalMarketStatusPage> {
           ? Center(child: CircularProgressIndicator())
           : errorMessage.isNotEmpty
               ? Center(child: Text(errorMessage))
-              : _buildMarketStatusList(),
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text(
+                        'Global Market Status',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: _buildMarketStatusList(),
+                    ),
+                  ],
+                ),
     );
   }
 
-    Widget _buildMarketStatusList() {
+  Widget _buildMarketStatusList() {
     return ListView.builder(
       itemCount: markets!.length,
       itemBuilder: (context, index) {
@@ -159,11 +177,7 @@ class _GlobalMarketStatusState extends State<GlobalMarketStatusPage> {
                 ],
               ],
             ),
-            trailing: Icon(
-              Icons.trending_up,
-              color: Colors.lightBlueAccent,
-              size: 30,
-            ),
+            
           ),
         );
       },

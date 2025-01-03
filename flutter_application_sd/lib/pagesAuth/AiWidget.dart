@@ -16,6 +16,8 @@ class CreateArticleWithAIWidget extends StatefulWidget {
   String? imagePreviewUrl;
   bool? isPublic = true;
   DateTime? selectedDate;
+  bool? isCompanyEditable = true;
+  bool? isCategoryEditable = true;
 
   CreateArticleWithAIWidget({
     super.key,
@@ -27,6 +29,8 @@ class CreateArticleWithAIWidget extends StatefulWidget {
     this.imageUrl,
     this.isPublic,
     this.selectedDate,
+    this.isCompanyEditable,
+    this.isCategoryEditable
   });
 
   @override
@@ -43,6 +47,8 @@ class _CreateArticleWithAIWidgetState extends State<CreateArticleWithAIWidget> {
   String? imagePreviewUrl;
   bool? isPublic = true;
   dynamic data;
+  bool? isCompanyEditable ;
+  bool? isCategoryEditable ;
 
   @override
   void initState() {
@@ -53,32 +59,34 @@ class _CreateArticleWithAIWidgetState extends State<CreateArticleWithAIWidget> {
     imagePreviewUrl = widget.imagePreviewUrl;
     imageUrl = widget.imageUrl;
     selectedDate = widget.selectedDate;
+    isCompanyEditable = widget.isCompanyEditable;
+    isCategoryEditable = widget.isCategoryEditable;
     if (data != null) {
       useGoogle = false;
     }
   }
 
   void handleImageUpload() async {
-  html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
-  uploadInput.accept = 'image/*';
-  uploadInput.click();
+    html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
+    uploadInput.accept = 'image/*';
+    uploadInput.click();
 
-  uploadInput.onChange.listen((e) async {
-    final files = uploadInput.files;
-    if (files!.isEmpty) return;
+    uploadInput.onChange.listen((e) async {
+      final files = uploadInput.files;
+      if (files!.isEmpty) return;
 
-    final reader = html.FileReader();
-    reader.readAsDataUrl(files[0]);
-    reader.onLoadEnd.listen((e) {
-      if (mounted) {  
-        setState(() {
-          imagePreviewUrl = reader.result as String;
-          imageUrl = imagePreviewUrl!.split(',').last;
-        });
-      }
+      final reader = html.FileReader();
+      reader.readAsDataUrl(files[0]);
+      reader.onLoadEnd.listen((e) {
+        if (mounted) {  
+          setState(() {
+            imagePreviewUrl = reader.result as String;
+            imageUrl = imagePreviewUrl!.split(',').last;
+          });
+        }
+      });
     });
-  });
-}
+  }
 
 
   Future<void> createArticleWithAI() async {
@@ -97,14 +105,6 @@ class _CreateArticleWithAIWidgetState extends State<CreateArticleWithAIWidget> {
     } else {
       filteredData = data; 
     }
-
-    if (filteredData == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('No data found for the selected year.')),
-      );
-      return;
-    }
-
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -179,7 +179,7 @@ class _CreateArticleWithAIWidgetState extends State<CreateArticleWithAIWidget> {
                     selectedCompany = value;
                   });
                 },
-                isEditable: false,
+                isEditable: isCompanyEditable!,
               ),
               const SizedBox(height: 16),
               CategorySelector(
@@ -189,16 +189,19 @@ class _CreateArticleWithAIWidgetState extends State<CreateArticleWithAIWidget> {
                     selectedCategory = value;
                   });
                 },
+                isEditable: isCompanyEditable!,
               ),
               const SizedBox(height: 16),
               DateSelector(
-                selectedDate: selectedDate,
-                onDateSelected: (value) {
-                  setState(() {
-                    selectedDate = value;
-                  });
-                },
-              ),
+              initialYear: selectedDate?.year ?? DateTime.now().year,
+              startYear: 2008,
+              endYear: DateTime.now().year,
+              onYearSelected: (year) {
+                setState(() {
+                  selectedDate = DateTime(year, 12, 31);
+                });
+              },
+            ),
               const SizedBox(height: 16),
               if (data==null)
                const Text('This AI uses Google information, so pay attention.'),

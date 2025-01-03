@@ -30,7 +30,6 @@ class GeneratedArticlePage extends StatefulWidget {
 class _GeneratedArticlePageState extends State<GeneratedArticlePage> {
   late TextEditingController titleController;
   late TextEditingController descriptionController;
-  late TextEditingController categoryController;
 
   DateTime? selectedDate;
   String? imagePreviewUrl;
@@ -45,7 +44,6 @@ class _GeneratedArticlePageState extends State<GeneratedArticlePage> {
     super.initState();
     titleController = TextEditingController(text: widget.article.title);
     descriptionController = TextEditingController(text: cleanDescription(widget.article.description));
-    categoryController = TextEditingController(text: widget.article.category);
     isPublic = widget.article.isPublic;
     imagePreviewUrl = widget.imagePreviewUrl;
     imageUrl = widget.imageUrl;
@@ -60,12 +58,10 @@ class _GeneratedArticlePageState extends State<GeneratedArticlePage> {
     return text;
   }
 
-  // Save article method
   Future<void> saveArticle() async {
     if (titleController.text.isEmpty ||
         descriptionController.text.isEmpty ||
-        selectedDate == null || // Make sure a date is selected
-        categoryController.text.isEmpty) {
+        selectedDate == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please fill in all required fields.')),
       );
@@ -78,11 +74,11 @@ class _GeneratedArticlePageState extends State<GeneratedArticlePage> {
       description: descriptionController.text,
       company: widget.article.company,
       author: "ciao",
-      timeUnit: selectedDate!.toString(), // Store the selected date as a string
+      timeUnit: selectedDate!.toString(),
       isPublic: isPublic,
       isAI: isAIEnabled,
       imageUrl: imageUrl,
-      category: categoryController.text,
+      category: widget.article.category,
     );
 
     try {
@@ -108,7 +104,6 @@ class _GeneratedArticlePageState extends State<GeneratedArticlePage> {
     }
   }
 
-  // Handle image upload
   void handleImageUpload() async {
     html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
     uploadInput.accept = 'image/*';
@@ -122,7 +117,6 @@ class _GeneratedArticlePageState extends State<GeneratedArticlePage> {
       reader.readAsDataUrl(files[0]);
       reader.onLoadEnd.listen((e) {
         if (mounted) {
-          // Check if the widget is still mounted before calling setState
           setState(() {
             imagePreviewUrl = reader.result as String;
             imageUrl = imagePreviewUrl!.split(',').last;
@@ -142,7 +136,6 @@ class _GeneratedArticlePageState extends State<GeneratedArticlePage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: const [
                   CircularProgressIndicator(),
-                  
                 ],
               ),
             )
@@ -169,10 +162,17 @@ class _GeneratedArticlePageState extends State<GeneratedArticlePage> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    CompanySelector(
-                      selectedCompany: widget.article.company,
-                      onCompanySelected: (_) {},
-                      isEditable: false, // Disable editing
+                    const Text(
+                      'Company',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      widget.article.company,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        color: Colors.black54,
+                      ),
                     ),
                     const SizedBox(height: 16),
                     const Text(
@@ -189,20 +189,29 @@ class _GeneratedArticlePageState extends State<GeneratedArticlePage> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    DateSelector(
-                      selectedDate: selectedDate,
-                      onDateSelected: (pickedDate) {
-                        setState(() {
-                          selectedDate = pickedDate;
-                        });
-                      },
+                    const Text(
+                      'Year',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      "${selectedDate?.year ?? ''}",
+                      style: const TextStyle(
+                        fontSize: 16,
+                        color: Colors.black54,
+                      ),
                     ),
                     const SizedBox(height: 16),
-                    TextField(
-                      controller: categoryController,
-                      decoration: const InputDecoration(
-                        labelText: 'Category',
-                        border: OutlineInputBorder(),
+                    const Text(
+                      'Category',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      widget.article.category,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        color: Colors.black54,
                       ),
                     ),
                     const SizedBox(height: 16),

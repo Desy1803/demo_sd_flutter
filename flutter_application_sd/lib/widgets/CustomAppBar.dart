@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 
-
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final bool showBackButton;
   final Color backgroundColor;
   final Color titleColor;
-  final List<Widget> actions; // Aggiungi il parametro actions per le azioni personalizzate
+  final List<Widget> actions; 
 
   CustomAppBar({
     this.title = 'Trading Reports',
@@ -21,17 +20,15 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       automaticallyImplyLeading: false,
       backgroundColor: backgroundColor,
-      toolbarHeight: 120, // Altezza fissa per l'AppBar
+      toolbarHeight: 120, 
       flexibleSpace: Column(
         children: [
-          // Parte superiore dell'AppBar
           Container(
             height: 60,
             padding: EdgeInsets.symmetric(horizontal: 16),
             color: backgroundColor,
             child: Row(
               children: [
-                // Icona per tornare indietro
                 if (showBackButton)
                   IconButton(
                     icon: const Icon(Icons.arrow_back, color: Colors.white, size: 26),
@@ -42,7 +39,6 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                 const SizedBox(width: 8),
                 const Icon(Icons.show_chart, color: Colors.white, size: 26),
                 const SizedBox(width: 8),
-                // Titolo della AppBar
                 Text(
                   title,
                   style: TextStyle(
@@ -52,12 +48,10 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   ),
                 ),
                 Spacer(),
-                // Aggiungi le azioni personalizzate (se presenti)
                 ...actions,
               ],
             ),
           ),
-          // Menu sotto l'AppBar
           Container(
             height: 50,
             color: Color(0xFF001F3F).withOpacity(0.9),
@@ -66,6 +60,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                 _buildNavItem(context, 'Home', '/'),
                 _buildNavItem(context, 'Personal Area', '/personal-areas'),
                 _buildNavItem(context, 'News', '/news'),
+                _buildNavItem(context, 'Global Status Market', '/global-status-market'),
                 _buildNavItem(context, 'About Us', '/about'),
               ],
             ),

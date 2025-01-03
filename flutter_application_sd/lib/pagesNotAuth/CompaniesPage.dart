@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_sd/dtos/Company.dart';
+import 'package:flutter_application_sd/pagesAuth/PersonalDataSummaryPage.dart';
 import 'package:flutter_application_sd/pagesNotAuth/CompanyBalanceSheet.dart';
 import 'package:flutter_application_sd/pagesNotAuth/CompanyDetailPage.dart';
 import 'package:flutter_application_sd/pagesNotAuth/GlobalMarketStatusPage.dart';
@@ -165,26 +166,21 @@ class _CompaniesPageState extends State<CompaniesPage> {
         actions: [
           IconButton(
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => GlobalMarketStatusPage(),
-                ),
-              );
-            },
-            icon: Icon(
-              Icons.access_time,
-              color: Colors.white,
-            ),
-          ),
-          IconButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => LoginPage(),
-                ),
-              );
+              if (Model.sharedInstance.isAuthenticated()) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => PersonalDataSummaryPage(),
+                  ),
+                );
+              } else {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => LoginPage(),
+                  ),
+                );
+              }
             },
             icon: Icon(
               Icons.person,

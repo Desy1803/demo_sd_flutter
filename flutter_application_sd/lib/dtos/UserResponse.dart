@@ -1,13 +1,11 @@
-class User {
+class UserResponse {
   String? username;
-  String? password;
   String? firstName;
   String? lastName;
   String? email;
 
-  User({
+  UserResponse({
     this.username,
-    this.password,
     this.firstName,
     this.lastName,
     this.email,
@@ -16,17 +14,15 @@ class User {
   Map<String, dynamic> toJson() {
     return {
       'username': username,
-      'password': password,
       'firstName': firstName,
       'lastName': lastName,
       'email': email,
     };
   }
 
-  factory User.fromJson(Map<String, dynamic> json) {
-    return User(
+  factory UserResponse.fromJson(Map<String, dynamic> json) {
+    return UserResponse(
       username: json['username'],
-      password: json['password'],
       firstName: json['firstName'],
       lastName: json['lastName'],
       email: json['email'],
@@ -35,6 +31,6 @@ class User {
 
   @override
   String toString() {
-    return 'User(username: $username, password: $password, firstName: $firstName, lastName: $lastName, email: $email,)';
+    return 'User(username: $username, firstName: $firstName, lastName: $lastName, email: $email)';
   }
 }

@@ -44,6 +44,7 @@ class _WriteArticlePageState extends State<WriteArticlePage> {
     selectedDate = widget.selectedDate;
     articleData = widget.articleData;
     symbol = widget.symbol;
+ 
   }
 
   Future<void> saveArticle() async {
@@ -114,150 +115,203 @@ class _WriteArticlePageState extends State<WriteArticlePage> {
 }
 
 
-  @override
-  Widget build(BuildContext context) {
-    if (!Model.sharedInstance.isAuthenticated()) {
-      return const LoginRecommendationPopup();
-    }
-    return Scaffold(
-      appBar: CustomAppBar(),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Create Your Article',
+@override
+Widget build(BuildContext context) {
+
+  if (!Model.sharedInstance.isAuthenticated()) {
+    return const LoginRecommendationPopup();
+  }
+  return Scaffold(
+    appBar: CustomAppBar(),
+    body: Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Create Your Article',
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF001F3F),
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              '* Required fields',
+              style: TextStyle(
+                fontSize: 14,
+                fontStyle: FontStyle.italic,
+                color: Colors.red,
+              ),
+            ),
+            const SizedBox(height: 16),
+            CompanySelector(
+              selectedCompany: selectedCompany,
+              onCompanySelected: (value) {
+                setState(() {
+                  selectedCompany = value;
+                });
+              },
+            ),
+            const SizedBox(height: 16),
+            CategorySelector(
+              selectedCategory: selectedCategory,
+              onCategorySelected: (value) {
+                setState(() {
+                  selectedCategory = value;
+                });
+              },
+              visibleAnalysis: articleData!=null,
+            ),
+            const SizedBox(height: 16),
+            DateSelector(
+              initialYear: selectedDate?.year ?? DateTime.now().year,
+              startYear: 2008,
+              endYear: DateTime.now().year,
+              onYearSelected: (year) {
+                setState(() {
+                  selectedDate = DateTime(year, 12, 31);
+                });
+              },
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Want to make it easier? You can use AI to create your article:',
+              style: TextStyle(
+                fontSize: 16,
+                color: Color(0xFF001F3F),
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 8),
+            GestureDetector(
+              onTap: () {
+                if (selectedCompany == null ||
+                    selectedCategory == null ||
+                    selectedDate == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Please fill in all required fields.')),
+                  );
+                  return;
+                }
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => CreateArticleWithAIWidget(
+                      data: articleData,
+                      selectedCategory: selectedCategory,
+                      selectedCompany: selectedCompany,
+                      selectedDate: selectedDate,
+                      imagePreviewUrl: imagePreviewUrl,
+                      imageUrl: imageUrl,
+                      isCompanyEditable: false,
+                      isCategoryEditable: true,
+                    ),
+                  ),
+                );
+              },
+              child: const Text(
+                'Try creating your article with AI',
                 style: TextStyle(
-                  fontSize: 22,
+                  fontSize: 16,
+                  color: Color(0xFF001F3F),
                   fontWeight: FontWeight.bold,
+                  decoration: TextDecoration.underline,
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            TextField(
+              controller: titleController,
+              decoration: InputDecoration(
+                labelText: 'Title*',
+                labelStyle: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.normal,
                   color: Color(0xFF001F3F),
                 ),
-              ),
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => CreateArticleWithAIWidget(
-                        data: articleData,
-                        selectedCategory: selectedCategory,
-                        selectedCompany: selectedCompany,
-                        selectedDate: selectedDate,
-                        imagePreviewUrl: imagePreviewUrl,
-                        imageUrl: imageUrl,
-                      ),
-                    ),
-                  );
-                },
-                child: const Text(
-                  'Try creating your article with AI',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Color(0xFF001F3F),
-                    decoration: TextDecoration.underline,
-                  ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.0),
                 ),
               ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: titleController,
-                decoration: const InputDecoration(
-                  labelText: 'Title',
-                  border: OutlineInputBorder(),
+              style: const TextStyle(fontSize: 16),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: descriptionController,
+              maxLines: 4,
+              decoration: InputDecoration(
+                labelText: 'Description*',
+                labelStyle: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.normal,
+                  color: Color(0xFF001F3F),
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.0),
                 ),
               ),
-              const SizedBox(height: 16),
-              CompanySelector(
-                selectedCompany: selectedCompany,
-                onCompanySelected: (value) {
-                  setState(() {
-                    selectedCompany = value;
-                  });
-                },
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: descriptionController,
-                maxLines: 4,
-                decoration: const InputDecoration(
-                  labelText: 'Description',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 16),
-              CategorySelector(
-                selectedCategory: selectedCategory,
-                onCategorySelected: (value) {
-                  setState(() {
-                    selectedCategory = value;
-                  });
-                },
-              ),
-              const SizedBox(height: 16),
-              DateSelector(
-                selectedDate: selectedDate,
-                onDateSelected: (value) {
-                  setState(() {
-                    selectedDate = value;
-                  });
-                },
-              ),
-              const SizedBox(height: 16),
-              if (imagePreviewUrl != null)
-                Column(
-                  children: [
-                    const Text('Image Preview:'),
-                    const SizedBox(height: 8),
-                    Image.network(imagePreviewUrl!),
-                  ],
-                ),
-              ElevatedButton(
-                onPressed: handleImageUpload,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF001F3F),
-                ),
-                child: const Text('Upload Image', style: TextStyle(color: Colors.white)),
-              ),
-              const SizedBox(height: 16),
-              Row(
+              style: const TextStyle(fontSize: 16),
+            ),
+            const SizedBox(height: 16),
+            if (imagePreviewUrl != null)
+              Column(
                 children: [
-                  Checkbox(
-                    value: isPublic,
-                    onChanged: (value) {
-                      setState(() {
-                        isPublic = value!;
-                      });
-                    },
-                  ),
-                  const Text('Public Article'),
+                  const Text('Image Preview:'),
+                  const SizedBox(height: 8),
+                  Image.network(imagePreviewUrl!),
                 ],
               ),
-              const SizedBox(height: 24),
-              Center(
-                child: ElevatedButton(
-                  onPressed: saveArticle,
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 16.0,
-                      horizontal: 32.0,
-                    ),
-                    backgroundColor: const Color(0xFF001F3F),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
+            ElevatedButton(
+              onPressed: handleImageUpload,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF001F3F),
+              ),
+              child: const Text('Upload Image', style: TextStyle(color: Colors.white)),
+            ),
+            const SizedBox(height: 24),
+            Row(
+              children: [
+                Checkbox(
+                  value: isPublic,
+                  onChanged: (value) {
+                    setState(() {
+                      isPublic = value!;
+                    });
+                  },
+                ),
+                const Text(
+                  'Public Article',
+                  style: TextStyle(fontSize: 16, color: Color(0xFF001F3F)),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            Center(
+              child: ElevatedButton(
+                onPressed: saveArticle,
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 16.0,
+                    horizontal: 32.0,
                   ),
-                  child: const Text(
-                    "Save Article",
-                    style: TextStyle(fontSize: 18, color: Colors.white),
+                  backgroundColor: const Color(0xFF001F3F),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.0),
                   ),
                 ),
+                child: const Text(
+                  "Save Article",
+                  style: TextStyle(fontSize: 18, color: Colors.white),
+                ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }

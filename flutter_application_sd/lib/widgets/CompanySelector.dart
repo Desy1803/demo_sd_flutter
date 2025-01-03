@@ -143,34 +143,60 @@ class _CompanySelectorState extends State<CompanySelector> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        if (!widget.isEditable) return;
+    final labelStyle = const TextStyle(
+      fontSize: 18,
+      fontWeight: FontWeight.bold,
+      color: Color(0xFF001F3F),
+    );
 
-        if (_overlayEntry != null) {
-          _hideDropdown();
-        } else {
-          _showDropdown(context);
-        }
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey),
-          borderRadius: BorderRadius.circular(8),
-          color: Colors.white,
+    final helperStyle = const TextStyle(
+      fontSize: 14,
+      color: Colors.grey,
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Select Company*",
+          style: labelStyle,
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              selectedCompany ?? 'Select Company*',
-              style: TextStyle(color: selectedCompany != null ? Colors.black : Colors.grey[600]),
+        const SizedBox(height: 8),
+        GestureDetector(
+          onTap: () {
+            if (!widget.isEditable) return;
+
+            if (_overlayEntry != null) {
+              _hideDropdown();
+            } else {
+              _showDropdown(context);
+            }
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey),
+              borderRadius: BorderRadius.circular(8),
+              color: Colors.white,
             ),
-            if (widget.isEditable) const Icon(Icons.arrow_drop_down),
-          ],
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  selectedCompany ?? 'Choose a company',
+                  style: TextStyle(color: selectedCompany != null ? Colors.black : Colors.grey[600]),
+                ),
+                if (widget.isEditable) const Icon(Icons.arrow_drop_down),
+              ],
+            ),
+          ),
         ),
-      ),
+        const SizedBox(height: 8),
+        Text(
+          "Choose a company from the list or search by name.",
+          style: helperStyle,
+        ),
+      ],
     );
   }
 }

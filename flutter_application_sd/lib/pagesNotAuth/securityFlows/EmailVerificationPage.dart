@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_sd/widgets/WelcomeDialogWidget.dart';
 import 'LoginPage.dart'; 
 import 'package:flutter_application_sd/restManagers/HttpRequest.dart';
 
@@ -54,10 +55,11 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Email verified successfully!")),
       );
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => LoginPage()),
-      );
+        showDialog(
+        context: context,
+        builder: (context) => welcomeDialog(context),
+        );
+      
     } else if (response == false) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Email not verified yet. Please check your inbox.")),

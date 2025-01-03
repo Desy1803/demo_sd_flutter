@@ -8,12 +8,14 @@ import 'package:flutter_application_sd/dtos/ArticleUpdate.dart';
 import 'package:flutter_application_sd/dtos/AuthenticationData.dart';
 import 'package:flutter_application_sd/dtos/Company.dart';
 import 'package:flutter_application_sd/dtos/CompanyDetails.dart';
+import 'package:flutter_application_sd/dtos/ImageUpdate.dart';
 import 'package:flutter_application_sd/dtos/LatestInfoDto.dart';
 import 'package:flutter_application_sd/dtos/Market.dart';
 import 'package:flutter_application_sd/dtos/PaginatedResponse.dart';
 import 'package:flutter_application_sd/dtos/Pagination.dart';
 import 'package:flutter_application_sd/dtos/SearchArticleCriteria.dart';
 import 'package:flutter_application_sd/dtos/User.dart';
+import 'package:flutter_application_sd/dtos/UserResponse.dart';
 import 'package:flutter_application_sd/supports/Costants.dart';
 import 'RestManager.dart';
 
@@ -23,7 +25,6 @@ class Model {
   RestManager _restManager = RestManager();
 
   late AuthenticationData? _authenticationData = null;
-
 
 
 
@@ -142,6 +143,46 @@ class Model {
 
 
 
+
+Future<void> deleteUser() async {
+  try {
+    print("Deleting user");
+    String endpoint = "${Constants.DELET_USER}";
+
+    String rawResult = await _restManager.makeDeleteRequest(
+      Constants.ADDRESS_STORE_SERVER, 
+      endpoint, 
+      true
+    );
+    print("${rawResult}");
+    _authenticationData = null;
+
+    print("Deleted user");
+
+  } catch (e) {
+    print('Error deleting article: $e');
+  }
+}
+
+Future<UserResponse> getUser() async{ 
+  try{
+    String rawResult = await _restManager.makeGetRequest(
+        Constants.ADDRESS_STORE_SERVER,
+        Constants.GETREQUEST_USER,
+        true,
+      );
+
+      UserResponse res = UserResponse.fromJson(json.decode(rawResult));
+      return res;
+  }catch(e){
+    print("Error fetching user: $e");
+    throw Exception("Failed to fetch user info.");
+
+  }
+}
+
+
+
   Future<bool?> sendVerificationEmail(String email) async{
      Map<String, dynamic> params = {
       "email": email,
@@ -213,7 +254,6 @@ Future<List<Company>?> viewCompanies({required dynamic page, required dynamic si
       filters,
     );
 
-    print("Raw Result: $rawResult");
 
     final Map<String, dynamic> responseJson = json.decode(rawResult);
 
@@ -229,8 +269,6 @@ Future<List<Company>?> viewCompanies({required dynamic page, required dynamic si
     throw Exception("Failed to fetch companies.");
   }
 }
-
-
 
 
 Future<List<Company>?> getCompaniesBySearch(String value) async {
@@ -349,6 +387,7 @@ Future<List<ArticleResponse>?> getPublicArticles({required SearchArticleCriteria
       false,
       filters, 
     );
+    print("${rawResult}");
 
     if (rawResult.isEmpty) {
       throw Exception("Empty response from server for public articles.");
@@ -437,7 +476,6 @@ Future<ArticleUpdate?> updateArticle(ArticleUpdate article) async {
       true,
       params
     );
-    print("Raw ${rawResult}");
     final parsed = json.decode(rawResult) as Map<String, dynamic>;
 
     ArticleUpdate res = ArticleUpdate.fromJson(parsed);
@@ -450,12 +488,34 @@ Future<ArticleUpdate?> updateArticle(ArticleUpdate article) async {
   }
 }
 
-
-
-Future<void> deleteArticle(int articleId) async {
+Future<Article?> updateImage(ImageUpdate image) async {
   try {
-    Map<String, int> params = {
-      "id": articleId,
+
+    Map<String, dynamic> params = image.toJson();
+    String rawResult = await _restManager.makePostRequest(
+      Constants.ADDRESS_STORE_SERVER, 
+      Constants.SETIMAGE_ARTICLE, 
+      params,
+      true,
+    );
+    final parsed = json.decode(rawResult) as Map<String, dynamic>;
+
+    Article res = Article.fromJson(parsed);
+    print("Update article");
+
+    return res;
+  } catch (e) {
+    print('Error updating article: $e');
+    return null;
+  }
+}
+
+
+
+Future<void> deleteArticle(dynamic articleId) async {
+  try {
+    Map<String, dynamic> params = {
+      "id": articleId.toString(),
     };
     String endpoint = "${Constants.DELETE_ARTICLE_AUTH}";
 
@@ -476,15 +536,26 @@ Future<void> deleteArticle(int articleId) async {
 }
 
   Future<ArticleResponse> fetchAIArticle( {required String? company, required String? category, required DateTime? date, required String? useGoogle, dynamic data}) async {
-     dynamic params = {
-      "company": company!,
-      "category": category!,
-      "date": date.toString(),
-      "getSourcesFromGoogle": useGoogle,
-      "dataOfCompany": (data is List)
-          ? jsonEncode(data.map((item) => item.toJson()).toList())  
-          : jsonEncode(data.toJson()) 
-    };
+    dynamic params;
+    if(data!=null){
+      params = {
+        "company": company!,
+        "category": category!,
+        "date": date.toString(),
+        "getSourcesFromGoogle": useGoogle,
+        "dataOfCompany": (data is List)
+            ? jsonEncode(data.map((item) => item.toJson()).toList())  
+            : jsonEncode(data.toJson()) 
+      };
+    }else{
+      params = {
+        "company": company!,
+        "category": category!,
+        "date": date.toString(),
+        "getSourcesFromGoogle": useGoogle,
+      };
+    }
+     
 
     String endpoint = "${Constants.POSTREQUEST_CREATEARTICLEWITHAI}";
 
